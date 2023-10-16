@@ -1,0 +1,34 @@
+@import url(./var-color.scss);
+
+:root {
+    --app-color-primary: var(--color-blaze-orange);
+    --app-color-secondary: var(--color-blaze-orange2);
+    --app-color-pure-black: var(--color-black);
+    --app-color-white: var(--color-white);
+    --app-color-black: var(--color-tundora);
+    --app-color-background: var(--color-gallery);
+    --app-color-border: var(--color-concrete);
+    --app-color-border-bolder: var(--color-emperor);
+    --app-color-border-lighter: var(--color-gallery);
+    --app-color-bg-post: var(--color-athens-gray);
+    --app-color-btn-gallery: var(--color-emperor);
+    --app-color-border-top-loading: var(--color-emperor);
+    --app-color-text-product: var(--color-mine-shaft);
+    --app-color-tag-product: var(--color-punch);
+    --app-color-price-old-product: var(--color-dusty-gray);
+    --app-color-shalow-datebox: var(--color-silver);
+    --app-color-bg-filter: var(--color-silver);
+    --app-color-border-indicator: var(--color-emperor);
+    --app-color-bg-overlay: rgba(0, 0, 0, 0.4);
+    --app-color-shadow-order: rgba(0, 0, 0, 0.2);
+    --app-color-shadow-lighter: rgba(0, 0, 0, 0.2);
+    --app-color-sub-text-order: var(--color-emperor);
+    --app-color-bg-header: var(--color-tuna);
+    --app-color-bg-footer: var(--color-tuna);
+    --app-color-bg-the-cart: var(--color-tuna);
+    --app-color-bg-footer-below: var(--color-mine-shaft);
+    --app-color-bg-progress-bar: var(--color-gallery);
+    --app-color-bg-collection: var(--color-athens-gray);
+    --app-color-text-collection: var(--color-mine-shaft);
+    --app-color-bg-contact: var(--color-wild-sand);
+}

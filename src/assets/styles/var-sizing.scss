@@ -1,0 +1,12 @@
+:root {
+    --app-height-header-above: 43px;
+    --app-height-header-center: 102px;
+    --app-height-header-below: 60px;
+    --app-height-header: calc(
+        var(--app-height-header-above) + var(--app-height-header-center) +
+            var(--app-height-header-below)
+    );
+    --app-height-footer-above: 394px;
+    --app-height-footer-below: 72px;
+    --app-padding-content: 0 80px;
+}

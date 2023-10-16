@@ -1,0 +1,8 @@
+{
+  "globals": {
+    "computed": true,
+    "onMounted": true,
+    "ref": true,
+    "watch": true
+  }
+}

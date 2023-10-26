@@ -1,5 +1,13 @@
 <template>
-    <home-view/>
+    <div class="container-app">
+        <the-header></the-header>
+        <div class="flex w-full">
+            <the-sidebar></the-sidebar>
+            <div class="" style="width: calc(100% - 220px);">
+                <router-view></router-view>
+            </div>
+        </div>
+    </div>
     <base-toast ref="toastRef" :config="toastConfig" />
 </template>
 
@@ -11,7 +19,8 @@ import type { DxToast } from "devextreme-vue";
 import { ToastType } from "./enums";
 import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import HomeView from "./views/home/HomeView.vue";
+import TheHeader from "./layouts/TheHeader.vue";
+import TheSidebar from "./layouts/TheSidebar.vue";
 
 const toastConfig = ref<DxToast>({
     type: ToastType.success,
@@ -19,4 +28,9 @@ const toastConfig = ref<DxToast>({
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.container-app{
+    width: 100%;
+    height: 100vh;
+}
+</style>

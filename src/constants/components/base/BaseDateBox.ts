@@ -14,7 +14,10 @@ export const defaultBaseDateBoxConfig: DxDateBox = {
     applyButtonText: t('base.button.ok'),
     cancelButtonText: t('base.button.cancel'),
     focusStateEnabled: true,
+    displayFormat: "dd/MM/yyyy",
+    useMaskBehavior: true,
     hoverStateEnabled: true,
+    height: 32,
     elementAttr: {
         class: 'base-date-box',
     },

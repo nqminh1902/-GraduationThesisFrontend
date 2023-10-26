@@ -10,6 +10,7 @@
 import { DxNumberBox } from 'devextreme-vue/number-box';
 import { mergeObjects } from '@/utils';
 import { defaultBaseNumberBoxConfig } from '@/constants/components/base';
+import { computed, ref } from 'vue';
 
 // #region common
 const props = defineProps<{

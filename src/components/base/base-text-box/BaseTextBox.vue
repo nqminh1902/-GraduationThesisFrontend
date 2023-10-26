@@ -43,7 +43,7 @@ const internalValue = computed({
 });
 
 const defaultConfig: DxTextBox = {
-    height: 38,
+    height: 32,
     width: "100%",
 };
 

@@ -1,7 +1,7 @@
 import type DxNumberBox from 'devextreme-vue/number-box';
 
 export const defaultBaseNumberBoxConfig: DxNumberBox = {
-    height: 38,
+    height: 32,
     width: '100%',
     showSpinButtons: true,
     min: 0,

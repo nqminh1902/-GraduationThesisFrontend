@@ -5,7 +5,7 @@ const t = i18n.t;
 
 export const defaultBaseSelectBoxConfig: DxSelectBox = {
     width: 220,
-    height: 40,
+    height: 32,
     disabled: false,
     readOnly: false,
     searchEnabled: true,

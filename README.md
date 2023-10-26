@@ -1,4 +1,4 @@
-# FashionShop
+# ĐỒ án của Nguyễn Quang Minh
 
 This template should help get you started developing with Vue 3 in Vite.
 

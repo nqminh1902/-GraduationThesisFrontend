@@ -6,6 +6,7 @@
 import { defaultBaseDateBoxConfig } from '@/constants/components/base';
 import { mergeObjects } from '@/utils';
 import DxDateBox from 'devextreme-vue/date-box';
+import { computed } from 'vue';
 
 // #region common
 const props = defineProps<{
@@ -51,5 +52,8 @@ const internalValue = computed({
         inset 0 0 0 1000px var(--app-color-primary);
     box-shadow: inset 0 0 0 1px var(--app-color-shalow-datebox),
         inset 0 0 0 1000px var(--app-color-primary);
+}
+.dx-state-disabled{
+    background-color: #f4f4f4 !important;
 }
 </style>

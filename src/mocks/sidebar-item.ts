@@ -44,5 +44,33 @@ export const sidebarItems = [
         title: "Bài viết",
         name: "post-admin"
     },
-    
+
 ];
+
+export const recruitmentSidebar = [
+    {
+        icon: "tabler:news",
+        title: "Tin tuyển dụng",
+        name: "recruitment-news"
+    },
+    {
+        icon: "mdi:users",
+        title: "Ứng viên",
+        name: "candidate"
+    },
+    // {
+    //     icon: "uil:schedule",
+    //     title: "Lịch",
+    //     name: "schedule"
+    // },
+    // {
+    //     icon: "material-symbols:task-outline",
+    //     title: "Công việc",
+    //     name: "task"
+    // },
+    // {
+    //     icon: "mdi:report-pie-outline",
+    //     title: "Báo cáo",
+    //     name: "report"
+    // }
+]

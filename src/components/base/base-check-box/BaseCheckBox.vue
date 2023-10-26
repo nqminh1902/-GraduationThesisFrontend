@@ -6,6 +6,7 @@
 import { defaultBaseCheckBoxConfig } from '@/constants/components/base';
 import { mergeObjects } from '@/utils';
 import { DxCheckBox } from 'devextreme-vue/check-box';
+import { computed } from 'vue';
 
 // #region common
 const props = defineProps<{
@@ -19,7 +20,7 @@ const emit = defineEmits<{
 
 const internalValue = computed({
     get() {
-        return props.modelValue ?? '';
+        return props.modelValue ?? false;
     },
     set(newValue) {
         emit('update:modelValue', newValue);

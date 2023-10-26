@@ -58,6 +58,12 @@
   font-weight: normal;
 }
 
+div::marker {
+  content: none !important;
+  list-style-type: none !important;
+}
+
+
 body {
   min-height: 100vh;
   color: var(--color-text);

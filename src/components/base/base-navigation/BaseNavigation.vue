@@ -50,7 +50,7 @@
 import type { DxSelectBox } from "devextreme-vue";
 import { BaseSelectBox } from "..";
 import { useI18n } from "vue3-i18n";
-import type { BaseNavigationType } from "@/types";
+import type { BaseNavigationType } from "../../../types";
 import { Icon } from "@iconify/vue";
 import { computed, ref } from "vue";
 
@@ -124,10 +124,10 @@ const handleChangePage = (isNextPage: boolean = true) => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    margin: 0px 16px;
     height: 46px;
     padding: 10px 20px;
-    background-color: var(--app-color-background);
+    background-color: #F5F5F5;
     .controls {
         .previous,
         .next {

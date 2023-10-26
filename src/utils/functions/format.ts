@@ -33,3 +33,14 @@ export function formatTextNumber(price: string) {
     }
     return result;
 }
+
+export function formatDate(dateString: string, isRemoveDate?: boolean) {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    if (isRemoveDate) {
+        return `${month}/${year}`;
+    }
+    return `${day}/${month}/${year}`;
+}

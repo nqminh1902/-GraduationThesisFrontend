@@ -3,7 +3,7 @@ import { DxButton } from 'devextreme-vue/button';
 
 export const defaultBaseButtonConfig: DxButton = {
     width: 'auto',
-    height: 40,
+    height: 32,
     type: ButtonType.default,
     stylingMode: ButtonStylingMode.contained,
     elementAttr: {

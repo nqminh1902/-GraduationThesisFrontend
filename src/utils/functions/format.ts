@@ -34,7 +34,7 @@ export function formatTextNumber(price: string) {
     return result;
 }
 
-export function formatDate(dateString: string, isRemoveDate?: boolean) {
+export function formatDate(dateString: any, isRemoveDate?: boolean) {
     const date = new Date(dateString);
     const day = date.getDate();
     const month = date.getMonth() + 1;

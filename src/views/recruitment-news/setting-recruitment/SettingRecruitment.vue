@@ -7,12 +7,13 @@
                 width="20"
                 height="20"
                 class="cursor-pointer"
+                @click="backPage"
             />
             <div class="title">Thêm mới</div>
         </div>
         <div class="setting-content">
             <div class="setting-sidebar">
-                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-infor', params: {id: 0} }">
+                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-infor', params: {id: route.params.id} }">
                     <Icon icon="material-symbols:edit-outline"  
                     width="20"
                     height="20"
@@ -20,7 +21,7 @@
                     class="cursor-pointer mr-[8px]"/>
                     <div  class="">Thông tin tuyển dụng</div>
                 </router-link>
-                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-plan', params: {id: 0}  }">
+                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-plan', params: {id: route.params.id}  }">
                     <Icon icon="mdi:floor-plan"  
                     width="20"
                     height="20"
@@ -28,7 +29,7 @@
                     class="cursor-pointer mr-[8px]"/>
                     <div class="">Kế hoạch thực hiện</div>
                 </router-link>
-                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-process', params: {id: 0}  }">
+                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-process', params: {id: route.params.id}  }">
                     <Icon icon="carbon:ibm-process-mining"  
                     width="20"
                     height="20"
@@ -36,7 +37,7 @@
                     class="cursor-pointer mr-[8px]"/>
                     <div  class="">Quy trình tuyển dụng</div>
                 </router-link>
-                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-council', params: {id: 0}  }">
+                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-council', params: {id: route.params.id}  }">
                     <Icon icon="pepicons-pop:people"  
                     width="20"
                     height="20"
@@ -73,7 +74,36 @@ import {
     BasePopup,
     BaseSelectBox,
 } from "../../../components/base/index";
-import { ButtonStylingMode, ButtonType } from "../../../enums";
+import { ButtonStylingMode, ButtonType, ToastType } from "../../../enums";
+import { useRecruitmentStore } from "../../../stores";
+import { storeToRefs } from "pinia";
+import RecruitmentApi from "../../../apis/recruitment/recruitment-api"
+import { useRoute, useRouter } from "vue-router";
+import { RecruitmentModel } from "../../../models";
+import { useToastStore } from "../../../stores";
+
+const recruitmentStore = useRecruitmentStore()
+const {recruitment} = storeToRefs(recruitmentStore)
+const recruitmentApi = new RecruitmentApi()
+const toastStore = useToastStore();
+const route = useRoute()
+const router = useRouter()
+let isEdit = false
+
+if(route.params.id != "0"){
+    getRecruitment()
+    isEdit = true
+}else{
+    recruitment.value = new RecruitmentModel()
+}
+
+async function getRecruitment(){
+    const res = await recruitmentApi.getByID(route.params.id.toString())
+    if(res.data.Success){
+        recruitment.value = res.data.Data;
+        
+    }
+}
 
 const buttonSaveConfig = ref<DxButton>({
     type: ButtonType.default,
@@ -81,8 +111,27 @@ const buttonSaveConfig = ref<DxButton>({
     width: '100%',
     text: "Lưu và đăng tin",
     stylingMode: ButtonStylingMode.contained,
-    onClick(e) {
-        
+    async onClick(e) {
+        if(!isEdit){
+            recruitment.value.RecruitmentRounds.forEach((round, index) => {
+                round.SordOrder = index + 1
+            })
+            const res = await recruitmentApi.insert(recruitment.value)
+            if( res.data.Success) {
+                toastStore.toggleToast(true, "Thêm thành công", ToastType.success);
+                router.push({name: "recruitment-news"})
+            }else{
+                toastStore.toggleToast(true, "Thêm thất bại", ToastType.error);
+            }
+        }else{
+            const res = await recruitmentApi.update(recruitment.value.RecruitmentID,recruitment.value)
+            if( res.data.Success) {
+                toastStore.toggleToast(true, "Cập nhật thành công", ToastType.success);
+                router.push({name: "recruitment-news"})
+            }else{
+                toastStore.toggleToast(true, "Cập nhật thất bại", ToastType.error);
+            }
+        }
     },
 });
 
@@ -96,7 +145,14 @@ const buttonDraftConfig = ref<DxButton>({
         
     },
 });
+
+function backPage(){
+    router.go(-1)
+}
+
 </script>
+
+
 <style lang="scss" scoped>
 .setting-header{
     width: 100%;

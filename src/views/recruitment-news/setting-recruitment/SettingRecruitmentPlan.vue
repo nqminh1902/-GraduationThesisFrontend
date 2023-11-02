@@ -14,25 +14,25 @@
                 <div class="field flex-1">
                     <div class="lable">SL cần tuyển thực tế <span style="color: red;">*</span></div>
                     <base-number-box 
-                        :config="realQuantityConfig"
+                        :config="realQuantityConfig" v-model="recruitment.ActualQuantity"
                     />
                 </div>
-                <div class="w-[12px]"></div>
-                <div class="field flex-1">
+                <div class="w-[12px]" v-show="recruitment.PlanType == 0"></div>
+                <div class="field flex-1" v-show="recruitment.PlanType == 0">
                     <div class="lable">Chỉ tiêu tháng <span style="color: red;">*</span></div>
-                    <base-date-box :config="monthlyTargetConfig"/>
+                    <base-date-box :config="monthlyTargetConfig" v-model="recruitment.ReportPeriod"/>
                 </div>
                 <div class="w-[12px]"></div>
                 <div class="field flex-1">
                     <div class="lable">Thời hạn dự kiến<span style="color: red;">*</span></div>
-                    <base-date-box :config="expectedDeadlineConfig"/>
+                    <base-date-box :config="expectedDeadlineConfig" v-model="recruitment.ExpectedTime"/>
                 </div>
             </div>
             <div class="w-full mb-[12px]">
-                <base-check-box :config="checkboxConfig" v-model="isShowPopup"/>
+                <base-check-box :config="checkboxConfig"/>
             </div>
-            <div class="w-full" v-show="recruitmentPeriods.length">
-                <div class="flex justify-between">
+            <div class="w-full" v-show="recruitment.RecruitmentPeriods.length">
+                <div class="flex justify-between  mb-[12px]">
                     <div class="title-time">KẾ HOẠCH THEO ĐỢT</div>
                     <base-button :config="addPeriodConfig"/>
                 </div>
@@ -57,7 +57,8 @@
         :config="popupPeriodConfig"
         :popupVisible="isShowPopup"
         @close="isShowPopup = false"
-        ><template #body>
+        >
+        <template #body>
             <h2 class="mb-[12px]">{{isEdit ? 'Sửa đợt' : 'Thêm đợt'}}</h2>
             <div class="field">
                 <div class="lable"> Tên đợt tuyển dụng <span style="color: red;">*</span></div>
@@ -95,7 +96,7 @@
     </base-popup>
 </template>
 <script lang="ts" setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { DxButton, DxCheckBox, DxDataGrid, DxDateBox, DxNumberBox, DxPopup, DxTextBox } from "devextreme-vue";
 import {
     BaseNumberBox,
@@ -113,6 +114,19 @@ import {
 import { ButtonStylingMode, ButtonType } from "../../../enums";
 import {RecruitmentPeriodModel} from "../../../models"
 import { formatDate } from "../../../utils";
+import { useRecruitmentStore } from "../../../stores";
+import { storeToRefs } from "pinia";
+import type { Column } from "devextreme/ui/data_grid";
+
+const recruitmentStore = useRecruitmentStore()
+
+const { recruitment } = storeToRefs(recruitmentStore);
+
+const actualQuantity = computed(() => {
+    return recruitment.value.RecruitmentPeriods.reduce((acc, curr) => {
+        return acc += curr.Quantity
+    }, 0)
+})
 
 const realQuantityConfig = ref<DxNumberBox>({
     min: 0,
@@ -125,7 +139,10 @@ const recruitedNumberConfig = ref<DxNumberBox>({
 })
 
 const monthlyTargetConfig = ref<DxDateBox>({
-    placeholder: "dd/MM/yyyy"
+    placeholder: "MM/yyyy",
+    displayFormat: "MM/yyyy",
+    pickerType:"calendar",
+    openOnFieldClick: true
 })
 
 const expectedDeadlineConfig = ref<DxDateBox>({
@@ -133,7 +150,14 @@ const expectedDeadlineConfig = ref<DxDateBox>({
 })
 
 const checkboxConfig = ref<DxCheckBox>({
-    text: "Lên kế hoạch theo đợt"
+    text: "Lên kế hoạch theo đợt",
+    value: recruitment.value.PlanType ? true : false,
+    onValueChanged(e) {
+        recruitment.value.PlanType = e.value ? 1 : 0
+        if(e.value){
+            isShowPopup.value = true
+        }
+    },
 })
 
 const popupPeriodConfig: DxPopup = {
@@ -167,7 +191,6 @@ const targetDate = ref<DxDateBox>({
     openOnFieldClick: true
 })
 
-const recruitmentPeriods = ref<RecruitmentPeriodModel[]>([])
 const recruitmentPeriod = ref<RecruitmentPeriodModel>(new RecruitmentPeriodModel())
 
 const saveButton = ref<DxButton>({
@@ -178,14 +201,16 @@ const saveButton = ref<DxButton>({
     stylingMode: ButtonStylingMode.contained,
     onClick(e) {
         if(isEdit.value){
-            let period = recruitmentPeriods.value.find((period) => period.RecruitmentPeriodID == recruitmentPeriod.value.RecruitmentPeriodID)
+            let period = recruitment.value.RecruitmentPeriods.find((period) => period.RecruitmentPeriodID == recruitmentPeriod.value.RecruitmentPeriodID)
             period ? period = recruitmentPeriod.value : period
         }else{
-            recruitmentPeriods.value.push(recruitmentPeriod.value)
+            
+            recruitment.value.RecruitmentPeriods.push(recruitmentPeriod.value)
         }
         isEdit.value = false
         recruitmentPeriod.value = new RecruitmentPeriodModel()
         isShowPopup.value = false
+        recruitment.value.ActualQuantity = actualQuantity.value
         baseTableRef.value.getInstance().refresh()
     },
 })
@@ -198,8 +223,10 @@ const addPeriodConfig = ref<DxButton>({
     stylingMode: ButtonStylingMode.contained,
     onClick(e) {
         isShowPopup.value = true
-        if(!recruitmentPeriods.value.length) return 
-        recruitmentPeriod.value.RecruitmentPeriodID = recruitmentPeriods.value[recruitmentPeriods.value.length - 1].RecruitmentPeriodID++
+        if(!recruitment.value.RecruitmentPeriods.length) return
+        const startDate: Date = recruitment.value.RecruitmentPeriods[recruitment.value.RecruitmentPeriods.length - 1].EndDate as Date
+        recruitmentPeriod.value.StartDate = new Date(startDate)
+        recruitmentPeriod.value.RecruitmentPeriodID = recruitment.value.RecruitmentPeriods[recruitment.value.RecruitmentPeriods.length - 1].RecruitmentPeriodID++
     },
 })
 
@@ -238,18 +265,18 @@ const tableConfig = ref<DxDataGrid>({
             cellTemplate: "date-template",
             width: 200,
         },
-    ],
+    ] as (string | Column<any, any>)[],
     selection: {
         mode: "none"
     },
-    dataSource: recruitmentPeriods.value,
+    dataSource: recruitment.value.RecruitmentPeriods,
     keyExpr: "RecruitmentPeriodID",
 });
 
 function handleDeletePeriod(e: RecruitmentPeriodModel){
-    recruitmentPeriods.value = recruitmentPeriods.value.filter((period) => period.RecruitmentPeriodID != e.RecruitmentPeriodID)
-    console.log(recruitmentPeriods.value);
-    baseTableRef.value?.getInstance()?.option('dataSource', recruitmentPeriods.value)
+    recruitment.value.RecruitmentPeriods = recruitment.value.RecruitmentPeriods.filter((period) => period.RecruitmentPeriodID != e.RecruitmentPeriodID)
+    baseTableRef.value?.getInstance()?.option('dataSource', recruitment.value.RecruitmentPeriods)
+    recruitment.value.ActualQuantity = actualQuantity.value
 }
 
 function handleEditPeriod(e: RecruitmentPeriodModel){

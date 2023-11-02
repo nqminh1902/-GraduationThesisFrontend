@@ -1,15 +1,15 @@
 import { ToastType } from '@/enums';
 import { defineStore } from 'pinia';
 
-export const useToastStore = defineStore('cartStore', {
+export const useToastStore = defineStore('toastStore', {
     state: () => ({
         isShowToast: false,
         toastMessage: "",
-        ToastType: "info" 
+        ToastType: "info"
     }),
     getters: {},
     actions: {
-        toggleToast(isShow: boolean, message: string, type:ToastType){
+        toggleToast(isShow: boolean, message: string, type: ToastType) {
             this.isShowToast = isShow;
             this.toastMessage = message
             this.ToastType = type

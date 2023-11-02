@@ -8,29 +8,30 @@
                 <div class="lable">Tiêu đề tin tuyển dụng <span style="color: red;">*</span></div>
                 <base-text-box
                     :config="titleConfig"
+                    v-model="recruitment.Title"
                 />
             </div>
             <div class="field">
                 <div class="lable">Vị trí tuyển dụng <span style="color: red;">*</span></div>
-                <base-select-box :config="jobPositionConfig"/>
+                <base-select-box :config="jobPositionConfig"  v-model="recruitment.JobPositionID"/>
             </div>
             <div class="field">
                 <div class="lable">Ngành nghề <span style="color: red;">*</span></div>
-                <base-select-box :config="carrerConfig"/>
+                <base-select-box :config="carrerConfig" v-model="recruitment.CarrerID"/>
             </div>
             <div class="field">
                 <div class="lable">Địa điểm làm việc <span style="color: red;">*</span></div>
-                <base-select-box :config="workLocationConfig"/>
+                <base-select-box :config="workLocationConfig" v-model="recruitment.WorkLocationID"/>
             </div>
             <div class="flex">
                 <div class="field flex-1">
                     <div class="lable">Loại hình công việc</div>
-                    <base-select-box :config="typeOfWorkConfig"/>
+                    <base-select-box :config="typeOfWorkConfig" v-model="recruitment.WorkType"/>
                 </div>
                 <div class="w-[12px]"></div>
                 <div class="field flex-1">
                     <div class="lable">Hạn nộp hồ sơ <span style="color: red;">*</span></div>
-                    <base-date-box :config="deathLineConfig"/>
+                    <base-date-box :config="deathLineConfig" v-model="recruitment.RegistrationExpiryDate"/>
                 </div>
             </div>
             <div class="title-time">Mức lương</div>
@@ -39,6 +40,7 @@
                     <div class="lable">Từ <span style="color: red;">*</span></div>
                     <base-number-box 
                         :config="salaryFromConfig"
+                        v-model="recruitment.MinSalary"
                     />
                 </div>
                 <div class="w-[12px]"></div>
@@ -46,12 +48,13 @@
                     <div class="lable">Đến <span style="color: red;">*</span></div>
                     <base-number-box 
                         :config="salaryToConfig"
+                        v-model="recruitment.MaxSalary"
                     />
                 </div>
                 <div class="w-[12px]"></div>
                 <div class="field">
                     <div class="lable">Loại tiền <span style="color: red;">*</span></div>
-                    <base-select-box :config="currencyConfig"/>
+                    <base-select-box :config="currencyConfig" v-model="recruitment.CurrencyCodeID"/>
                 </div>
             </div>
         </div>
@@ -62,11 +65,11 @@
             </div>
             <div class="field">
                 <div class="lable">Mô tả công việc <span style="color: red;">*</span></div>
-                <base-text-area :config="descriptionConfig"/>
+                <base-text-area :config="descriptionConfig" v-model="recruitment.Summary"/>
             </div>
             <div class="field">
                 <div class="lable">Mô tả chung về công việc <span style="color: red;">*</span></div>
-                <DxHtmlEditor v-bind="generalDescriptionConfig">
+                <DxHtmlEditor v-bind="generalDescriptionConfig" v-model="recruitment.Description">
                     <DxToolbar :multiline="true">
                         <DxItem name="undo" />
                         <DxItem name="redo" />
@@ -112,7 +115,7 @@
             </div>
             <div class="field">
                 <div class="lable">Yêu cầu công việc <span style="color: red;">*</span></div>
-                <DxHtmlEditor v-bind="requirementsConfig">
+                <DxHtmlEditor v-bind="requirementsConfig" v-model="recruitment.Requirement">
                     <DxToolbar :multiline="true">
                         <DxItem name="undo" />
                         <DxItem name="redo" />
@@ -158,7 +161,7 @@
             </div>
             <div class="field">
                 <div class="lable">Quyền lợi <span style="color: red;">*</span></div>
-                <DxHtmlEditor v-bind="interestConfig">
+                <DxHtmlEditor v-bind="interestConfig" v-model="recruitment.Benefit">
                     <DxToolbar :multiline="true">
                         <DxItem name="undo" />
                         <DxItem name="redo" />
@@ -212,14 +215,14 @@
                 <div class="field flex-1">
                     <div class="lable">Người liên hệ <span style="color: red;">*</span></div>
                     <base-text-box
-                        :config="contactPersonConfig"
+                        :config="contactPersonConfig" v-model="recruitment.ContactName"
                     />
                 </div>
                 <div class="w-[12px]"></div>
                 <div class="field flex-1">
                     <div class="lable">Chức danh <span style="color: red;">*</span></div>
                     <base-text-box
-                        :config="jobTitleConfig"
+                        :config="jobTitleConfig" v-model="recruitment.ContactPosition"
                     />
                 </div>
             </div>
@@ -227,14 +230,14 @@
                 <div class="field flex-1">
                     <div class="lable">Số điện thoại <span style="color: red;">*</span></div>
                     <base-text-box
-                        :config="phoneConfig"
+                        :config="phoneConfig" v-model="recruitment.ContactMobile"
                     />
                 </div>
                 <div class="w-[12px]"></div>
                 <div class="field flex-1">
                     <div class="lable">Email <span style="color: red;">*</span></div>
                     <base-text-box
-                        :config="emailConfig"
+                        :config="emailConfig" v-model="recruitment.ContactEmail"
                     />
                 </div>
             </div>
@@ -260,12 +263,14 @@ import {
     DxTableContextMenu,
     DxMediaResizing
 } from 'devextreme-vue/html-editor';
-import { useToastStore } from "../../../stores";
+import { useRecruitmentStore } from "../../../stores";
+import { storeToRefs } from "pinia";
 import { ref } from "vue";
 import { DxDateBox, DxHtmlEditor, DxNumberBox, DxSelectBox, DxTextArea, DxTextBox } from "devextreme-vue";
+import {jobPositions, carrers, workLocations, currencys, workTypes} from "../../../mocks"
 
 const titleConfig = ref<DxTextBox>({
-    placeholder: "Tiêu đề tin đăng"
+    placeholder: "Tiêu đề tin đăng",
 })
 
 const contactPersonConfig = ref<DxTextBox>({
@@ -294,44 +299,26 @@ const jobPositionConfig = ref<DxSelectBox>({
     noDataText: 'Không có dữ liệu',
     displayExpr: "JobPositionName",
     valueExpr: "JobPositionID",
-    dataSource: [
-        {
-            JobPositionID: 1,
-            JobPositionName: "Quản đốc công việc",
-        },
-        {
-            JobPositionID: 2,
-            JobPositionName: "Giáo viên tiếng anh",
-        },
-        {
-            JobPositionID: 3,
-            JobPositionName: "Lập trình viên",
-        },
-    ],
+    dataSource: jobPositions,
     searchEnabled: true,
+    onItemClick(e) {
+        recruitment.value.JobPositionID = e.itemData.JobPositionID
+        recruitment.value.JobPositionName = e.itemData.JobPositionName
+    }
 });
 
 const carrerConfig = ref<DxSelectBox>({
     width: '100%',
     placeholder: 'Chọn ngành nghề',
     noDataText: 'Không có dữ liệu',
-    displayExpr: "CareerName",
+    displayExpr: "CarrerName",
     valueExpr: "CareerID",
-    dataSource: [
-        {
-            CareerID: 1,
-            CareerName: "Chăm sóc khách hàng",
-        },
-        {
-            CareerID: 2,
-            CareerName: "Thư kí",
-        },
-        {
-            CareerID: 3,
-            CareerName: "Kế toán",
-        },
-    ],
+    dataSource: carrers,
     searchEnabled: true,
+    onItemClick(e) {  
+        recruitment.value.CarrerID = e.itemData.CareerID
+        recruitment.value.CarrerName = e.itemData.CarrerName
+    }
 });
 
 const workLocationConfig = ref<DxSelectBox>({
@@ -340,21 +327,12 @@ const workLocationConfig = ref<DxSelectBox>({
     noDataText: 'Không có dữ liệu',
     displayExpr: "WorkLocationName",
     valueExpr: "WorkLocationID",
-    dataSource: [
-        {
-            WorkLocationID: 1,
-            WorkLocationName: "Văn phòng Hà Nội",
-        },
-        {
-            WorkLocationID: 2,
-            WorkLocationName: "Văn phòng thành phố Hồ Chí Minh",
-        },
-        {
-            WorkLocationID: 3,
-            WorkLocationName: "Chi nhánh Cầu Giấy",
-        },
-    ],
+    dataSource: workLocations,
     searchEnabled: true,
+    onItemClick(e) {
+        recruitment.value.WorkLocationID = e.itemData.WorkLocationID
+        recruitment.value.WorkLocationName = e.itemData.WorkLocationName
+    }
 });
 
 const deathLineConfig = ref<DxDateBox>({
@@ -367,41 +345,24 @@ const typeOfWorkConfig = ref<DxSelectBox>({
     noDataText: 'Không có dữ liệu',
     displayExpr: "TypeOfWorkName",
     valueExpr: "TypeOfWorkID",
-    dataSource: [
-        {
-            TypeOfWorkID: 1,
-            TypeOfWorkName: "Toàn thời gian",
-        },
-        {
-            TypeOfWorkID: 2,
-            TypeOfWorkName: "Bán thời gian",
-        },
-        {
-            TypeOfWorkID: 3,
-            TypeOfWorkName: "Hợp đồng thời vụ",
-        },
-        {
-            TypeOfWorkID: 4,
-            TypeOfWorkName: "Thực tập sinh",
-        },
-        {
-            TypeOfWorkID: 5,
-            TypeOfWorkName: "Cộng tác viên",
-        },
-        {
-            TypeOfWorkID: 6,
-            TypeOfWorkName: "Freelance",
-        },
-    ],
+    dataSource: workTypes,
     searchEnabled: true,
+    onItemClick(e) {
+        recruitment.value.WorkType = e.itemData.TypeOfWorkID
+    }
 });
 
 const currencyConfig = ref<DxSelectBox>({
     width: '100%',
     placeholder: 'Chọn loại tiền',
     noDataText: 'Không có dữ liệu',
-    dataSource: ['VND', 'USA', 'SGD', 'JPY', 'CNY'],
+    displayExpr: "value",
+    valueExpr: "id",
+    dataSource: currencys,
     searchEnabled: true,
+    onValueChanged(e) {
+        recruitment.value.CurrencyCodeID = e.value
+    },
 });
 
 const salaryFromConfig = ref<DxNumberBox>({
@@ -423,7 +384,10 @@ const generalDescriptionConfig = ref<DxHtmlEditor>({
     height: 300,
     activeStateEnabled: true,
     hoverStateEnabled: true,
-    placeholder: "Những công việc mà vị trí này phải đảm nhận..."
+    placeholder: "Những công việc mà vị trí này phải đảm nhận...",
+    onValueChanged(e) {
+        recruitment.value.Description = e.value
+    },
 })
 
 const requirementsConfig = ref<DxHtmlEditor>({
@@ -431,7 +395,10 @@ const requirementsConfig = ref<DxHtmlEditor>({
     height: 300,
     activeStateEnabled: true,
     hoverStateEnabled: true,
-    placeholder: "Những yêu cầu mà ứng viên phải đáp ứng..."
+    placeholder: "Những yêu cầu mà ứng viên phải đáp ứng...",
+    onValueChanged(e) {
+        recruitment.value.Requirement = e.value
+    },
 })
 
 const interestConfig = ref<DxHtmlEditor>({
@@ -439,8 +406,17 @@ const interestConfig = ref<DxHtmlEditor>({
     height: 300,
     activeStateEnabled: true,
     hoverStateEnabled: true,
-    placeholder: "Những quyền lợi mà ứng viên được nhận nếu trúng tuyển"
+    placeholder: "Những quyền lợi mà ứng viên được nhận nếu trúng tuyển",
+    onValueChanged(e) {
+        recruitment.value.Benefit = e.value
+    },
 })
+
+const recruitmentStore = useRecruitmentStore()
+
+const { recruitment } = storeToRefs(recruitmentStore);
+
+
 </script>
 
 <style lang="scss" scoped>

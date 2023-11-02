@@ -3,6 +3,7 @@ import { useUserOptionStore } from './user-option';
 import { useRecentStore } from './recent';
 import { useCompareStore } from './compare';
 import { useToastStore } from './toast';
+import { useRecruitmentStore } from './recruitment';
 
 export {
     useUserOptionStore,
@@ -10,4 +11,5 @@ export {
     useRecentStore,
     useCompareStore,
     useToastStore,
+    useRecruitmentStore
 };

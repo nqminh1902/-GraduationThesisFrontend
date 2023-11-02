@@ -19,15 +19,15 @@
             <div class="toolbar">
                 <base-text-box :config="searchDefaultConfig" />
             </div>
-            <div class="list-recruitment">
-                <div class="list-item">
+            <div class="list-recruitment" ref="recruitmentBlock" @scroll="handleScroll">
+                <div class="list-item" v-for="recruiment in recruitments" :key="recruiment.RecruitmentID">
                     <div class="recruitment-news-infor">
                         <div class="recruitment-status">
                             <div class="recruitment-status-dot"></div>
                         </div>
                         <div class="recruitment-infor">
                             <div class="flex justify-between ">
-                                <div class="recruitment-news-name">{{ recruitmentTemp.Title }}</div>
+                                <div class="recruitment-news-name">{{ recruiment.Title }}</div>
                                 <div class="recruitment-option">
                                     <Icon
                                         :icon="'entypo:dots-three-vertical'"
@@ -35,73 +35,88 @@
                                         width="16"
                                         height="16"
                                         class="cursor-pointer"
-                                        :id="'recruiment-'+recruitmentTemp.RecruitmentID"
-                                        @click="handleOpenOptionBtn(recruitmentTemp.RecruitmentID)"
+                                        :id="'recruiment-'+recruiment.RecruitmentID"
+                                        @click="handleOpenOptionBtn(recruiment.RecruitmentID)"
                                     />
                                 </div>
                             </div>
                             <div class="flex pt-[8px] pb-[16px] items-center">
-                                <div class="news-sub-content">{{ recruitmentTemp.JobPositionName }}</div>
+                                <div class="news-sub-content">{{ recruiment.JobPositionName }}</div>
                                 <div class="bg-[#6a727d] w-[6px] h-[6px] rounded-full mx-[7px]"></div>
-                                <div class="news-sub-content mr-[15px] pr-[15px] border-solid border-[#e0e0e0] border-r-[1px]">{{ recruitmentTemp.DepartmentName }}</div>
-                                <div class="sub-content mr-[15px] pr-[15px] border-solid border-[#e0e0e0] border-r-[1px]">Số lượng cần tuyển: <b>{{ recruitmentTemp.Quantity }}</b></div>
-                                <div class="sub-content mr-[15px] pr-[15px] border-solid border-[#e0e0e0] border-r-[1px]">Hạn nộp hồ sơ: <b>{{ formatDate(recruitmentTemp.RegistrationExpiryDate) }}</b></div>
-                                <div class="sub-content">Xem thêm</div>
+                                <div class="news-sub-content mr-[15px] pr-[15px] border-solid border-[#e0e0e0] border-r-[1px]">{{ recruiment.WorkLocationName }}</div>
+                                <div class="sub-content mr-[15px] pr-[15px] border-solid border-[#e0e0e0] border-r-[1px]">Số lượng cần tuyển: <b>{{ recruiment.ActualQuantity }}</b></div>
+                                <div class="sub-content mr-[15px] pr-[15px] border-solid border-[#e0e0e0] border-r-[1px]">Hạn nộp hồ sơ: <b>{{ formatDate(recruiment.RegistrationExpiryDate) }}</b></div>
+                                <div class="sub-content cursor-pointer" @click="handleOpenMoreInfor(recruiment.RecruitmentID)" :id="'more-'+recruiment.RecruitmentID">Xem thêm</div>
                             </div>
                         </div>
                     </div>
                     <div class="recruitment-news-rounds">
                         <div class="flex items-center">
-                            <div class="item-content" v-for="item in recruitmentTemp.RecruitmentRounds" :key="item.RecruitmentRoundID">
+                            <div class="item-content" v-for="item in recruiment.RecruitmentRounds" :key="item.RecruitmentRoundID">
                                 <div class="text-center text-xl font-bold"> - </div>
                                 <div class="round-name">{{ item.RecruitmentRoundName }}</div>
                             </div>
                         </div>
                     </div>
+                    <DxPopover 
+                        :target="'#recruiment-'+recruiment.RecruitmentID"
+                        show-event="click"
+                        @onHidden="isShowPopover = 0"
+                        :visible="isShowPopover == recruiment.RecruitmentID"
+                        :hideOnOutsideClick="true"
+                        position="bottom"
+                        width="150px"
+                        >
+                        <div class="item-btn" @click="handleEditRecruitment(recruiment.RecruitmentID)">
+                            <Icon
+                                :icon="'material-symbols:edit-outline'"
+                                :color="'#7a8188'"
+                                width="20"
+                                height="20"
+                                class="cursor-pointer"
+                            />
+                            <div class="">Sửa</div>
+                        </div>
+                        <div class="item-btn">
+                            <Icon
+                                :icon="'humbleicons:duplicate'"
+                                :color="'#7a8188'"
+                                width="20"
+                                height="20"
+                                class="cursor-pointer"
+                            />
+                            <div class="">Nhân bản</div>
+                        </div>
+                        <div class="item-btn" @click="handleDeleteRecruitment(recruiment.RecruitmentID)">
+                            <Icon
+                                :icon="'ic:baseline-delete'"
+                                :color="'#FF0000'"
+                                width="20"
+                                height="20"
+                                class="cursor-pointer"
+                            />
+                            <div class="" style="color: #FF0000;">Xóa</div>
+                        </div>
+                    </DxPopover>
+                    <DxPopover 
+                        :target="'#more-'+recruiment.RecruitmentID"
+                        show-event="click"
+                        @onHidden="isMoreInfor = 0"
+                        :visible="isMoreInfor == recruiment.RecruitmentID"
+                        :hideOnOutsideClick="true"
+                        position="bottom"
+                        width="372px"
+                        >
+                        <div class="p-[16px]">
+                            <div class="py-[8px]">Người tạo: <span class="font-bold">{{ recruiment.CreatedBy }}</span></div>
+                            <div class="py-[8px]">Ngày tạo: <span class="font-bold">{{ formatDate(recruiment.CreatedDate) }}</span></div>
+                            <div class="py-[8px]">Thời hạn dự kiến: <span class="font-bold">{{ formatDate(recruiment.ExpectedTime) }}</span></div>
+                        </div>
+                    </DxPopover>
                 </div>
             </div>
         </div>
     </div>
-    <DxPopover 
-        :target="'#recruiment-'+recruitmentTemp.RecruitmentID"
-        show-event="click"
-        @onHidden="isShowPopover = 0"
-        :visible="isShowPopover == recruitmentTemp.RecruitmentID"
-        :hideOnOutsideClick="true"
-        position="bottom"
-        width="150px"
-        >
-                <div class="item-btn">
-                    <Icon
-                        :icon="'material-symbols:edit-outline'"
-                        :color="'#7a8188'"
-                        width="20"
-                        height="20"
-                        class="cursor-pointer"
-                    />
-                    <div class="">Sửa</div>
-                </div>
-                <div class="item-btn">
-                    <Icon
-                        :icon="'humbleicons:duplicate'"
-                        :color="'#7a8188'"
-                        width="20"
-                        height="20"
-                        class="cursor-pointer"
-                    />
-                    <div class="">Nhân bản</div>
-                </div>
-                <div class="item-btn">
-                    <Icon
-                        :icon="'ic:baseline-delete'"
-                        :color="'#FF0000'"
-                        width="20"
-                        height="20"
-                        class="cursor-pointer"
-                    />
-                    <div class="" style="color: #FF0000;">Xóa</div>
-                </div>
-    </DxPopover>
 </template>
 <script lang="ts" setup>
 import { useI18n } from "vue3-i18n";
@@ -125,7 +140,7 @@ import type {
 import { ref } from "vue";
 import CustomStore from "devextreme/data/custom_store";
 import CollectionApi from "../../apis/collection/collection-api";
-import { CollectionModel, PagingRequest } from "../../models";
+import { CollectionModel, PagingRequest, RecruitmentModel } from "../../models";
 import type { BaseNavigationType } from "../../types";
 import type DxTextBox from "devextreme-vue/text-box";
 import { ButtonStylingMode, ButtonType, ToastType } from "../../enums";
@@ -133,11 +148,13 @@ import { useToastStore } from "../../stores";
 import { formatDate } from "../../utils";
 import { DxPopover } from 'devextreme-vue/popover';
 import { useRouter } from "vue-router";
+import RecruitmentApi from "../../apis/recruitment/recruitment-api"
 
 const toastStore = useToastStore();
 const { t, getLocale, setLocale } = useI18n();
 const router = useRouter()
-
+const filterPaging = new PagingRequest();
+const recruitmentApi = new RecruitmentApi()
 
 const searchDefaultConfig: DxTextBox = {
     width: 260,
@@ -173,445 +190,61 @@ const buttonConfig = ref<DxButton>({
     },
 });
 
-const recruitment = ref(JSON.stringify({
-    "RecruitmentID": 580,
-    "Title": "Tin tuyển dụng đào tạo",
-    "ValueSearch": "Tin tuyen dung dao tao",
-    "DepartmentID": "65725e22-3b53-452b-be69-70398321a498",
-    "DepartmentName": "VĂN PHÒNG ĐẠI DIỆN CÔNG TY CỔ PHẦN XÂY DỰNG CENTRAL",
-    "JobPositionID": 428,
-    "ListCareerID": null,
-    "ListCareerName": null,
-    "RankID": null,
-    "RankName": null,
-    "JobPositionName": "Lập trình viên",
-    "Quantity": 1,
-    "WorkType": 0,
-    "RegistrationExpiryDate": "2023-10-31T23:59:59.000+07:00",
-    "MinSalary": 0,
-    "MaxSalary": 0,
-    "CurrencyCodeID": null,
-    "Description": null,
-    "Summary": null,
-    "RecruitmentURL": null,
-    "ContactName": null,
-    "ContactEmail": "misaamisdemo@gmail.com",
-    "ContactPhone": "0912345689",
-    "ContactTitle": null,
-    "ContactUserID": "e652097d-a0d6-40db-8a09-e8c16234e31d",
-    "Position": null,
-    "Email": null,
-    "Mobile": null,
-    "Status": 1,
-    "ShowRecruiment": 0,
-    "UserID": "e652097d-a0d6-40db-8a09-e8c16234e31d",
-    "FullName": null,
-    "RecruitmentChannelIDs": null,
-    "MessageID": null,
-    "Requirement": null,
-    "Benifit": null,
-    "EmailRecruitment": null,
-    "PasswordEmail": null,
-    "CoverImage": null,
-    "LastMessageUid": null,
-    "ListPageFacebookID": null,
-    "IsSendMailWhenCandidateApply": false,
-    "IsUpdateCandidateByPeriod": null,
-    "IsAutoRecruit": null,
-    "EmailApplyTemplate": null,
-    "FacebookPost": null,
-    "SalaryContent": null,
-    "EmailSubject": null,
-    "IsChangerCoverImage": false,
-    "IsChangeJobPosition": false,
-    "IsChangeTemplate": false,
-    "GoogleTagCode": null,
-    "EmailTemplateID": null,
-    "TemplateID": null,
-    "CloseDate": null,
-    "ReportPeriod": null,
-    "RecruitmentRounds": [
-        {
-            "RecruitmentRoundID": 3845,
-            "RecruitmentRoundName": "Ứng tuyển",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 45,
-            "RoundType": 1,
-            "RoundTypeColor": "#B1C4D2",
-            "SortOrder": 1,
-            "IsSystem": true,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.556+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.554+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3846,
-            "RecruitmentRoundName": "Sơ loại hồ sơ",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 305,
-            "RoundType": null,
-            "RoundTypeColor": "rgba(251, 145, 172, 0.8)",
-            "SortOrder": 2,
-            "IsSystem": false,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.562+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.556+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3847,
-            "RecruitmentRoundName": "Phỏng vấn vòng 1",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 43,
-            "RoundType": 3,
-            "RoundTypeColor": "#21AAEA",
-            "SortOrder": 3,
-            "IsSystem": false,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.564+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.558+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3848,
-            "RecruitmentRoundName": "PV vòng 2",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 43,
-            "RoundType": 3,
-            "RoundTypeColor": "#21AAEA",
-            "SortOrder": 4,
-            "IsSystem": false,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.566+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.559+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3849,
-            "RecruitmentRoundName": "Offer",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 42,
-            "RoundType": 4,
-            "RoundTypeColor": "#39C5AB",
-            "SortOrder": 5,
-            "IsSystem": false,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.567+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.561+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3850,
-            "RecruitmentRoundName": "Học việc",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 44,
-            "RoundType": 2,
-            "RoundTypeColor": "#4285DF",
-            "SortOrder": 6,
-            "IsSystem": false,
-            "IsRequestTrain": true,
-            "CountCandidate": 1,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.569+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.562+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3851,
-            "RecruitmentRoundName": "Trúng tuyển",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 42,
-            "RoundType": 4,
-            "RoundTypeColor": "#39C5AB",
-            "SortOrder": 7,
-            "IsSystem": true,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.570+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.563+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3852,
-            "RecruitmentRoundName": "Đã tuyển",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 41,
-            "RoundType": 5,
-            "RoundTypeColor": "#64D271",
-            "SortOrder": 8,
-            "IsSystem": true,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.571+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.565+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3852,
-            "RecruitmentRoundName": "Đã tuyển",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 41,
-            "RoundType": 5,
-            "RoundTypeColor": "#64D271",
-            "SortOrder": 8,
-            "IsSystem": true,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.571+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.565+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3852,
-            "RecruitmentRoundName": "Đã tuyển",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 41,
-            "RoundType": 5,
-            "RoundTypeColor": "#64D271",
-            "SortOrder": 8,
-            "IsSystem": true,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.571+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.565+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3852,
-            "RecruitmentRoundName": "Đã tuyển",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 41,
-            "RoundType": 5,
-            "RoundTypeColor": "#64D271",
-            "SortOrder": 8,
-            "IsSystem": true,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.571+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.565+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3852,
-            "RecruitmentRoundName": "Đã tuyển",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 41,
-            "RoundType": 5,
-            "RoundTypeColor": "#64D271",
-            "SortOrder": 8,
-            "IsSystem": true,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.571+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.565+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        },
-        {
-            "RecruitmentRoundID": 3852,
-            "RecruitmentRoundName": "Đã tuyển",
-            "RecruitmentID": 580,
-            "EvaluationFormIDs": null,
-            "EvaluationFormNames": null,
-            "RoundTypeID": 41,
-            "RoundType": 5,
-            "RoundTypeColor": "#64D271",
-            "SortOrder": 8,
-            "IsSystem": true,
-            "IsRequestTrain": null,
-            "CountCandidate": null,
-            "RecruitmentRoundDetailEvaluations": null,
-            "Candidates": null,
-            "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-            "CreatedDate": "2023-10-18T14:21:46.552+07:00",
-            "CreatedBy": null,
-            "ModifiedDate": "2023-10-18T14:22:09.571+07:00",
-            "ModifiedBy": "NV000003",
-            "EditVersion": "2023-10-18T14:22:09.565+07:00",
-            "State": 0,
-            "OldData": null,
-            "PassWarningCode": null
-        }
-    ],
-    "RecruitmentInfoFields": null,
-    "RecruitmentQuestions": null,
-    "RecruitmentBoards": null,
-    "RecruitmentPeriods": null,
-    "RecruitmentCosts": null,
-    "RecruitmentDetails": null,
-    "IsLessThanNow": false,
-    "RecruitmentDetailSocialPages": null,
-    "CandidateSchedules": null,
-    "WebsiteConnectedData": null,
-    "LinkedinConnectedPage": null,
-    "LinkedinShareContent": null,
-    "TopCVCode": null,
-    "RecruitmentWebsiteDetailSettingData": null,
-    "TitleWebsite": "Tin tuyển dụng đào tạo",
-    "Files": null,
-    "IsEditable": true,
-    "IsPublished": null,
-    "PublishDate": null,
-    "RecruitmentPreselectConditions": null,
-    "RecruitmentPreselectActions": null,
-    "KeyWords": null,
-    "PlanType": null,
-    "ActualQuantity": 1,
-    "DescriptionFiles": null,
-    "ExpectedTime": "2023-10-31T00:00:00.000+07:00",
-    "ClosedReason": null,
-    "ClosedNote": null,
-    "WebsiteLanguage": null,
-    "IsEditProcess": null,
-    "IsPlainText": false,
-    "IsHideForCollaborator": false,
-    "IsHighlight": false,
-    "Advantage": null,
-    "GroupJobPositionID": null,
-    "GroupJobPositionName": null,
-    "RecruitmentWorkLocations": null,
-    "TenantID": "bfb5c2c4-7d5a-49c7-9520-c45b5aa31126",
-    "CreatedDate": "2023-10-17T17:06:42.220+07:00",
-    "CreatedBy": "AMIS MISA",
-    "ModifiedDate": "2023-10-21T22:03:02.873+07:00",
-    "ModifiedBy": null,
-    "EditVersion": null,
-    "State": 0,
-    "OldData": null,
-    "PassWarningCode": null
-}))
-
-const recruitmentTemp = JSON.parse(recruitment.value)
-
+const recruitments = ref<RecruitmentModel[]>([])
+const totalCount = ref(0)
 const isShowPopover = ref(0)
+
+const isMoreInfor = ref(0)
 
 function handleOpenOptionBtn(recruimnetID: number){
     isShowPopover.value = recruimnetID
 }
+
+function handleOpenMoreInfor(recruimnetID: number){
+    isMoreInfor.value = recruimnetID
+}
+
+async function getRecruitmentNews(){
+    const res = await recruitmentApi.getFilterPaging(filterPaging);
+        if (res) {
+            recruitments.value.push(...res.data.Data.Data);
+            totalCount.value = res.data.Data.TotalCount
+        }
+        return res.data.Data.Data || [];
+}
+
+getRecruitmentNews()
+
+function handleScroll() {
+    const container = document.querySelector(".list-recruitment")
+    if(container){
+          const scrollHeight =  container?.scrollHeight;
+          const scrollTop = container?.scrollTop;
+          const clientHeight =  container?.clientHeight;
+          
+          // Kiểm tra nếu đã cuộn đến cuối phần tử
+          if (scrollTop + clientHeight >= scrollHeight && recruitments.value.length < totalCount.value) {
+            filterPaging.PageIndex++;
+            getRecruitmentNews()
+          }
+    }
+}
+
+function handleEditRecruitment(recruitmentID: number){
+    router.push({name: 'setting-recruitment', params: {id: recruitmentID}})
+}
+
+async function handleDeleteRecruitment(recruitmentID: number){
+    const res = await recruitmentApi.delete(recruitmentID)
+    if(res.data.Success){
+        toastStore.toggleToast(true, "Xóa thành công", ToastType.success);
+        recruitments.value = recruitments.value.filter(recruitment => recruitment.RecruitmentID !== recruitmentID)
+        totalCount.value--
+    }else{
+        toastStore.toggleToast(true, "Xóa thất bại", ToastType.error);
+    }
+}
+
 
 </script>
 
@@ -645,10 +278,13 @@ function handleOpenOptionBtn(recruimnetID: number){
         margin-bottom: 12px;
         height: fit-content;
         border-radius: 5px;
-        background-color: #ffffff;
+        height: calc(100% - 80px);
+        overflow-y: auto;
         .list-item{
             padding: 24px;
             width: 100%;
+            margin-bottom: 16px;
+            background-color: #ffffff;
             .recruitment-news-infor{
                 position: relative;
                 border-bottom: solid 1px #e0e6ec;
@@ -709,6 +345,7 @@ function handleOpenOptionBtn(recruimnetID: number){
                     min-width: 120px;
                     border-radius: 5px;
                     cursor: pointer;
+                    flex: 1;
                 }
                 .round-name{
                     color: #6a727d;

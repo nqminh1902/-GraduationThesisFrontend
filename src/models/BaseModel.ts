@@ -1,7 +1,7 @@
 export class BaseModel {
-    createdDate?: string;
-    createdBy?: string;
-    modifiedDate?: string;
-    modifiedBy?: string;
+    CreatedDate?: string;
+    CreatedBy?: string;
+    ModifiedDate?: string;
+    ModifiedBy?: string;
     State?: number = 0
 }

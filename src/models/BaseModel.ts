@@ -1,7 +1,10 @@
+import { StateEnum } from "@/enums";
+
 export class BaseModel {
     CreatedDate?: string;
     CreatedBy?: string;
     ModifiedDate?: string;
     ModifiedBy?: string;
-    State?: number = 0
+    State?: StateEnum = StateEnum.Insert
 }
+

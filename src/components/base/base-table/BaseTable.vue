@@ -10,24 +10,36 @@
             <template #date-template="{ data }">
                 <slot name="date" :data="data"></slot>
             </template>
+            <template #name-template="{ data }">
+                <slot name="name" :data="data"></slot>
+            </template>
+            <template #birthday-template="{ data }">
+                <slot name="birthday" :data="data"></slot>
+            </template>
+            <template #cell-template="{ data }">
+                <div class="h-[30px]" v-if="!data.value"> -- </div>
+                <div class="h-[30px]" v-else >{{ data.value }}</div>
+            </template>
             <template #feature-cell="{ data }">
                 <div class="feature-wrap" v-if="isShowCustomButton">
-                    <Icon
-                        :icon="'material-symbols:edit-outline'"
-                        :color="'#2563eb'"
-                        width="20"
-                        height="20"
-                        @click="onEdit(data.data)"
-                        class="cursor-pointer"
-                    />
-                    <Icon
-                        :icon="'material-symbols:delete-outline'"
-                        :color="'red'"
-                        width="20"
-                        height="20"
-                        @click="onDelete(data.data)"
-                        class="ml-1.5 cursor-pointer"
-                    />
+                    <div class="cursor-pointer p-[4px] rounded-full bg-white">
+                        <Icon
+                            :icon="'material-symbols:edit-outline'"
+                            :color="'#2563eb'"
+                            width="20"
+                            height="20"
+                            @click="onEdit(data.data)"
+                        />
+                    </div>
+                    <div class="ml-1.5 cursor-pointer p-[4px] rounded-full bg-white">
+                        <Icon
+                            :icon="'material-symbols:delete-outline'"
+                            :color="'red'"
+                            width="20"
+                            height="20"
+                            @click="onDelete(data.data)"
+                        />
+                    </div>
                 </div>
             </template>
         </dx-data-grid>
@@ -75,6 +87,12 @@ const dataGridConfig = computed<DxDataGrid>(() =>
     mergeObjects(defaultConfig, props.config)
 );
 
+dataGridConfig.value.columns?.forEach((column: any) => {
+    if(!column.cellTemplate){
+        column.cellTemplate = "cell-template"
+    }
+})
+
 dataGridConfig.value.columns?.push({
     fixed: true,
     fixedPosition: "right",
@@ -104,6 +122,7 @@ defineExpose({
 .base-table {
     width: 100%;
     height: 100% ;
+    overflow: hidden;
     .dx-row.dx-header-row {
         background-color: #F5F5F5;
         font-size: 14px;
@@ -115,7 +134,6 @@ defineExpose({
         align-items: center;
         position: absolute;
         right: 4px;
-
         min-width: 30px;
     }
     .dx-row.dx-row-lines.dx-state-hover {

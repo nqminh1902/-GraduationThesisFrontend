@@ -20,10 +20,21 @@
                     :config="tableConfig"
                     ref="baseTableRef"
                     @on-delete="handleDelete"
-                    @on-edit="handleEdit"
                 >
-                    <template #status="data">
-                        <base-status :status="data.data.data.Status" />
+                    <template #date="data">
+                        <div class="">{{ formatDate(data.data.data.ApplyDate) }}</div>
+                    </template>
+                    <template #birthday="data">
+                        <div class="">{{ formatDate(data.data.data.Birthday) }}</div>
+                    </template>
+                    <template #name="data">
+                        <div class="flex items-center">
+                            <img style="width: 30px; height: 30px; border-radius: 50%;" v-if="data.data.data.Avatar" :src="data.data.data.Avatar" alt="">
+                            <div class="text-center" :style="{backgroundColor: getBackGroundColor()}" style="width: 30px; height: 30px; border-radius: 50%;" v-else>
+                                <p class="text-white leading-[30px] text-[13px] font-medium">{{ getInitials(data.data.data.CandidateName) }}</p>
+                            </div>
+                            <span class="ml-[12px]">{{ data.data.data.CandidateName }}</span>
+                        </div>
                     </template>
                 </base-table>
             </div>
@@ -32,70 +43,7 @@
                 @onNavigationChange="pagingChange"
             />
         </div>
-        <base-popup
-            v-if="isShowPopup"
-            :config="popupConfig"
-            :showBtnFooter="true"
-            :popupVisible="isShowPopup"
-            @close="isShowPopup = false"
-            @save="handleSave"
-        >
-            <template #body>
-                <div class="add-category-header text-3xl">
-                    {{ popupTitle }}
-                </div>
-                <div class="add-category-body">
-                    <div class="field">
-                        <div class="lable">
-                            Tên bộ sưu tập<span style="color: red"> *</span>
-                        </div>
-
-                        <base-text-box
-                            :config="textBoxConfig"
-                            v-model="collection.CollectionName"
-                            class="mb-6"
-                        />
-                        <p class="error-message" v-if="isError.CollectionName">
-                            Tên bộ sưu không được để trống
-                        </p>
-                    </div>
-                    <div class="field">
-                        <div class="lable">
-                            Trạng thái<span style="color: red"> *</span>
-                        </div>
-
-                        <base-select-box
-                            v-model="collection.Status"
-                            :config="selectBoxConfig"
-                        />
-                    </div>
-                </div>
-            </template>
-        </base-popup>
-        <base-popup
-            v-if="showPopupDelete"
-            :config="popupConfig"
-            :showBtnFooter="true"
-            :popupVisible="showPopupDelete"
-            @close="showPopupDelete = false"
-            @save="handleRemove"
-        >
-            <template #body>
-                <div class="add-category-header text-3xl">Cảnh báo</div>
-                <div class="add-category-body">
-                    <div class="d-flex items-center">
-                        <Icon
-                            :icon="'ph:warning'"
-                            :color="'yellow'"
-                            width="30"
-                            height="30"
-                            class="mr-6"
-                        />
-                        Bạn có chắc chắn muốn xóa không?
-                    </div>
-                </div>
-            </template>
-        </base-popup>
+        <popup-candidate v-if="isShowPopup" :isShowPopup="isShowPopup" :candidateID="candidateID" :is-edit="isUpdate" @onClose="isShowPopup = false"  @on-save="handleSaveSucces"></popup-candidate>
     </div>
 </template>
 <script lang="ts" setup>
@@ -125,27 +73,28 @@ import type { BaseNavigationType } from "../../types";
 import type DxTextBox from "devextreme-vue/text-box";
 import { ButtonStylingMode, ButtonType, ToastType } from "../../enums";
 import { useToastStore } from "../../stores";
+import type { Column } from "devextreme/ui/data_grid";
+import CandidateApi from "../../apis/candidate/candidate-api"
+import PopupCandidate from "./popup/PopupCandidate.vue"
+import { formatDate } from "../../utils";
 
 const toastStore = useToastStore();
 const { t, getLocale, setLocale } = useI18n();
-const collectionApi = new CollectionApi();
+const candidateApi = new CandidateApi();
 const filterPaging = new PagingRequest();
 const totalCount = ref<number>(0);
 const baseTableRef = ref();
-const isShowPopup = ref<boolean>(false);
+const isShowPopup =  ref(false);
 const isUpdate = ref<boolean>(false);
 const collection = ref(new CollectionModel());
 const showPopupDelete = ref<boolean>(false);
-const isError = ref({
-    CollectionName: false,
-});
+const candidateID = ref(undefined)
 const popupTitle = ref("Thêm bộ sưu tập");
 
 const dataSource = new CustomStore({
-    key: "CollectionID",
+    key: "CandidateID",
     async load(loadOptions) {
-        filterPaging.Collums = ["CollectionName"];
-        const res = await collectionApi.getFilterPaging(filterPaging);
+        const res = await candidateApi.getFilterPaging(filterPaging);
         if (res) {
             totalCount.value = res.data.Data.TotalCount;
         }
@@ -154,56 +103,113 @@ const dataSource = new CustomStore({
     loadMode: "processed",
 });
 
-const selectBoxConfig = ref<DxSelectBox>({
-    displayExpr: "name",
-    valueExpr: "id",
-    dataSource: [
-        {
-            id: 0,
-            name: "Không kích hoạt",
-        },
-        {
-            id: 1,
-            name: "Kích hoạt",
-        },
-    ],
-    searchEnabled: false,
-    onValueChanged: (e) => {},
-});
 
 const tableConfig = ref<DxDataGrid>({
+    width: '100%',
     columns: [
         {
             alignment: "left",
-            caption: "Tên bộ sưu tập",
-            dataField: "CollectionName",
+            caption: "Tên ứng viên",
+            dataField: "CandidateName",
+            dataType: "string",
+            cellTemplate: "name-template",
+            width: 300,
+        },
+        {
+            alignment: "left",
+            caption: "Số điện thoại",
+            dataField: "Mobile",
             dataType: "string",
             width: 200,
         },
         {
             alignment: "left",
-            caption: "Trạng thái",
-            dataField: "Status",
-            dataType: "number",
-            width: 150,
-            cellTemplate: "status-template",
+            caption: "Email",
+            dataField: "Email",
+            dataType: "string",
+            width: 200,
         },
-    ],
+        {
+            alignment: "left",
+            caption: "Ngày sinh",
+            dataField: "Birthday",
+            cellTemplate: "birthday-template",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Ngày ứng tuyển",
+            dataField: "ApplyDate",
+            cellTemplate: "date-template",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Vị trí ứng tuyển",
+            dataField: "JobPositionName",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Tin tuyển dụng",
+            dataField: "RecruitmentName",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Vòng ứng tuyển",
+            dataField: "RecruitmentRoundName",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Nguồn ứng viên",
+            dataField: "ChannelName",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Trình độ đào tạo",
+            dataField: "EducationDegreeName",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Nơi đào tạo",
+            dataField: "EducationPlaceName",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Chuyên ngành",
+            dataField: "EducationMajorName",
+            dataType: "string",
+            width: 200,
+        },
+    ] as (string | Column<any, any>)[],
     dataSource: dataSource,
-    keyExpr: "CollectionID",
+    keyExpr: "CandidateID",
     onSelectionChanged(e) {
         console.log(e);
     },
-});
-
-const popupConfig = ref<DxPopup>({
-    height: "auto",
-    width: 400,
+    onRowDblClick(e) {
+        candidateID.value = e.data.CandidateID
+        isUpdate.value = true
+        isShowPopup.value = true
+    },
 });
 
 const searchDefaultConfig: DxTextBox = {
     width: 260,
-    placeholder: t("base.general.typeValue"),
+    placeholder: "Tìm kiếm",
     buttons: [
         {
             name: "BtnSearch",
@@ -215,18 +221,9 @@ const searchDefaultConfig: DxTextBox = {
     ],
     onValueChanged: (e) => {
         filterPaging.SearchValue = e.value?.trim();
+        filterPaging.Collums = ["CandidateName", "Email", "Mobile", "EducationMajorName", "EducationDegreeName"]
         filterPaging.PageIndex = 1;
         baseTableRef.value.getInstance().refresh();
-    },
-};
-
-const textBoxConfig: DxTextBox = {
-    placeholder: t("base.general.typeValue"),
-    onValueChanged: (e) => {
-        collection.value.CollectionName = e.value?.trim();
-        if (e.value) {
-            isError.value.CollectionName = false;
-        }
     },
 };
 
@@ -241,6 +238,7 @@ const buttonConfig = ref<DxButton>({
         popupTitle.value = "Thêm bộ sưu tập";
         isShowPopup.value = true;
         isUpdate.value = false;
+        candidateID.value = undefined
     },
 });
 
@@ -250,86 +248,43 @@ function pagingChange(e: BaseNavigationType) {
     baseTableRef.value.getInstance().refresh();
 }
 
-function validateForm() {
-    if (!collection.value.CollectionName) {
-        isError.value.CollectionName = true;
-        return false;
-    }
-    return true;
+function handleSaveSucces(){
+    baseTableRef.value.getInstance().refresh();
 }
 
-async function handleSave() {
-    if (validateForm()) {
-        try {
-            if (isUpdate.value) {
-                await handleUpdate();
-            } else {
-                await handleInsert();
-            }
-        } catch {
-            toastStore.toggleToast(true, "Thêm mới thất bại", ToastType.error);
-        }
+function getBackGroundColor(){
+    var letters = "0123456789ABCDEF";
+    var color = "#";
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
     }
+    return color;
 }
 
-async function handleUpdate() {
-    const res = await collectionApi.update(
-        collection.value.CollectionID,
-        collection.value
-    );
-    if (res?.data.Success) {
-        toastStore.toggleToast(true, "Cập nhật thành công", ToastType.success);
-        baseTableRef.value.getInstance().refresh();
-        isShowPopup.value = false;
-    } else {
-        toastStore.toggleToast(true, "Cập nhật thất bại", ToastType.error);
+function getInitials(name: string) {
+   // Tách các từ trong tên bằng khoảng trắng
+   const tuArr = name.split(' ');
+
+    // Lấy chữ cái đầu tiên của hai từ cuối cùng và ghép lại
+    let chuoiKetQua = '';
+    const soTu = tuArr.length;
+    if (soTu >= 2) {
+    chuoiKetQua += tuArr[soTu - 2][0];
+    chuoiKetQua += tuArr[soTu - 1][0];
     }
+
+    // Trả về chữ cái đầu tiên đã được trích xuất
+    return chuoiKetQua.toUpperCase();
 }
 
-async function handleInsert() {
-    const res = await collectionApi.insert(collection.value);
-    if (res?.data.Success) {
-        toastStore.toggleToast(true, "Thêm mới thành công", ToastType.success);
-        baseTableRef.value.getInstance().refresh();
-        isShowPopup.value = false;
-    } else {
-        toastStore.toggleToast(true, "Thêm mới thất bại", ToastType.error);
-    }
-}
-
-async function handleRemove() {
-    const res = await collectionApi.delete(collection.value.CollectionID);
-    if (res?.data.Success) {
+async function handleDelete(event: any) {
+    
+    const res = await candidateApi.delete(event.CandidateID)
+    if(res.data.Success){
         toastStore.toggleToast(true, "Xóa thành công", ToastType.success);
         baseTableRef.value.getInstance().refresh();
-        showPopupDelete.value = false;
-    } else {
+    }else{
         toastStore.toggleToast(true, "Xóa thất bại", ToastType.error);
-    }
-}
-
-function handleDelete(event: any) {
-    collection.value = event;
-    showPopupDelete.value = true;
-}
-
-async function handleEdit(event: any) {
-    try {
-        const res: any = await collectionApi.getByID(event.CollectionID);
-        if (res?.data.Success) {
-            collection.value = res?.data.Data;
-            popupTitle.value = "Sửa bộ sưu tập";
-            isUpdate.value = true;
-            isShowPopup.value = true;
-        } else {
-            toastStore.toggleToast(
-                true,
-                "Lấy thông bộ sưu tập thất bại",
-                ToastType.error
-            );
-        }
-    } catch (error) {
-        toastStore.toggleToast(true, "Lấy thông tin thất bại", ToastType.error);
     }
 }
 </script>

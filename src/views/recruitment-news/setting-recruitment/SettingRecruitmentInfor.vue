@@ -366,11 +366,13 @@ const currencyConfig = ref<DxSelectBox>({
 });
 
 const salaryFromConfig = ref<DxNumberBox>({
-    min: 0
+    min: 0,
+    format: '#,##0',
 })
 
 const salaryToConfig = ref<DxNumberBox>({
-    min: 0
+    min: 0,
+    format: '#,##0',
 })
 
 const descriptionConfig: DxTextArea = {

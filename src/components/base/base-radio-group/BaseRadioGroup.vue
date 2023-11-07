@@ -10,6 +10,7 @@
 import { defaultBaseRadioGroupConfig } from '@/constants/components/base';
 import { mergeObjects } from '@/utils';
 import DxRadioGroup from 'devextreme-vue/radio-group';
+import { computed, ref } from 'vue';
 
 // #region common
 const props = defineProps<{
@@ -19,7 +20,7 @@ const props = defineProps<{
 
 const radioGroupConfig = mergeObjects(
     defaultBaseRadioGroupConfig,
-    props.config
+    props.config,
 );
 
 const emit = defineEmits<{
@@ -55,6 +56,10 @@ defineExpose({
     }
     .dx-radiobutton-icon-checked .dx-radiobutton-icon-dot {
         background: var(--app-color-secondary);
+        margin-top: -17px;
+        margin-left: 6px;
+        width: 11px;
+        height: 11px;
     }
 }
 </style>

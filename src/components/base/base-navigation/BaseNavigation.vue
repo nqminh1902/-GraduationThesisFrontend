@@ -67,7 +67,7 @@ const props = defineProps<{
 
 const navigation = ref<BaseNavigationType>({
     pageIndex: 1,
-    pageSize: 15,
+    pageSize: 25,
     isChangePageSize: false,
 });
 

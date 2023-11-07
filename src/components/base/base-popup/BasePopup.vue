@@ -126,6 +126,7 @@ function handleClosePopup() {
     }
     .base-body {
         flex: 1;
+        height: calc(100% - 30px);
     }
     .base-footer {
         width: 100%;

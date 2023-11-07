@@ -1,4 +1,4 @@
-export class PagingRequest{
+export class PagingRequest {
     // Số bản ghi trong 1 page
     PageSize: number = 25;
 
@@ -15,7 +15,7 @@ export class PagingRequest{
     SortOrder: string[] = []
 
     // Giá trị custom muốn truyền theo để xử lý logic gì đó nếu cần
-    CustomParam: object = {} 
+    CustomParam: object = {}
 
     // Lọc giá dữ liệu theo điều kiện tùy chỉnh
     // Frontend: btoa([["CreateDate","<>","Minh"],["Price",">","20000"]]')

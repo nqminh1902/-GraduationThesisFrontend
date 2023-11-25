@@ -111,7 +111,7 @@ import {
     BaseDateBox,
     BaseCheckBox,
 } from "../../../components/base";
-import { ButtonStylingMode, ButtonType } from "../../../enums";
+import { ButtonStylingMode, ButtonType, StateEnum } from "../../../enums";
 import {RecruitmentPeriodModel} from "../../../models"
 import { formatDate } from "../../../utils";
 import { useRecruitmentStore } from "../../../stores";
@@ -192,6 +192,7 @@ const targetDate = ref<DxDateBox>({
 })
 
 const recruitmentPeriod = ref<RecruitmentPeriodModel>(new RecruitmentPeriodModel())
+let recruitmentPeriods = [...recruitment.value.RecruitmentPeriods]
 
 const saveButton = ref<DxButton>({
     type: ButtonType.default,
@@ -203,15 +204,20 @@ const saveButton = ref<DxButton>({
         if(isEdit.value){
             let period = recruitment.value.RecruitmentPeriods.find((period) => period.RecruitmentPeriodID == recruitmentPeriod.value.RecruitmentPeriodID)
             period ? period = recruitmentPeriod.value : period
+            if(period){
+                period = recruitmentPeriod.value
+                period.State = StateEnum.Update
+            }
         }else{
-            
+            recruitmentPeriod.value.State = StateEnum.Insert
             recruitment.value.RecruitmentPeriods.push(recruitmentPeriod.value)
         }
+        recruitmentPeriods = [...recruitment.value.RecruitmentPeriods]
         isEdit.value = false
         recruitmentPeriod.value = new RecruitmentPeriodModel()
         isShowPopup.value = false
         recruitment.value.ActualQuantity = actualQuantity.value
-        baseTableRef.value.getInstance().refresh()
+        baseTableRef.value.getInstance().option("dataSource", recruitmentPeriods)
     },
 })
 
@@ -269,13 +275,14 @@ const tableConfig = ref<DxDataGrid>({
     selection: {
         mode: "none"
     },
-    dataSource: recruitment.value.RecruitmentPeriods,
+    dataSource: recruitmentPeriods,
     keyExpr: "RecruitmentPeriodID",
 });
 
 function handleDeletePeriod(e: RecruitmentPeriodModel){
-    recruitment.value.RecruitmentPeriods = recruitment.value.RecruitmentPeriods.filter((period) => period.RecruitmentPeriodID != e.RecruitmentPeriodID)
-    baseTableRef.value?.getInstance()?.option('dataSource', recruitment.value.RecruitmentPeriods)
+    e.State = StateEnum.Delete
+    recruitmentPeriods = recruitment.value.RecruitmentPeriods.filter((period) => period.State != StateEnum.Delete)
+    baseTableRef.value?.getInstance()?.option('dataSource', recruitmentPeriods)
     recruitment.value.ActualQuantity = actualQuantity.value
 }
 

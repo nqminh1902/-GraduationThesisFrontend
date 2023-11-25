@@ -24,12 +24,28 @@ const router = createRouter({
             component: () => import('../views/recruitment-news/RecruitmentNews.vue'),
         },
         {
+            path: '/detail/:id',
+            name: 'recruitment-news-detail',
+            meta: {
+                Title: t('app.title.admin'),
+            },
+            component: () => import('../views/recruitment-news/recruitment-news-detail/RecruitmentNewsDetail.vue'),
+        },
+        {
             path: '/candidate',
             name: 'candidate',
             meta: {
                 Title: t('app.title.admin'),
             },
             component: () => import('../views/candidate/Candidate.vue'),
+        },
+        {
+            path: '/schedule',
+            name: 'schedule',
+            meta: {
+                Title: "Lịch tuyển dụng",
+            },
+            component: () => import('../views/schedule/RecruitmentSchedule.vue'),
         },
         {
             path: '/recruitment-news/:id',

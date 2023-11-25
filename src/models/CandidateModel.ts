@@ -1,4 +1,5 @@
 import { BaseModel } from "./BaseModel";
+import type { RecruitmentDetailModel } from "./RecruitmentDetailModel";
 
 export class CandidateModel extends BaseModel {
     CandidateID: number = 0
@@ -36,6 +37,7 @@ export class CandidateModel extends BaseModel {
     Facebook: string = ""
     Zalo: string = ""
     WorkExperients: WorkExperientModel[] = []
+    RecruitmentDetail?: RecruitmentDetailModel
 }
 
 export class WorkExperientModel extends BaseModel {

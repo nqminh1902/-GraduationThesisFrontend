@@ -58,11 +58,11 @@ export const recruitmentSidebar = [
         title: "Ứng viên",
         name: "candidate"
     },
-    // {
-    //     icon: "uil:schedule",
-    //     title: "Lịch",
-    //     name: "schedule"
-    // },
+    {
+        icon: "uil:schedule",
+        title: "Lịch",
+        name: "schedule"
+    },
     // {
     //     icon: "material-symbols:task-outline",
     //     title: "Công việc",

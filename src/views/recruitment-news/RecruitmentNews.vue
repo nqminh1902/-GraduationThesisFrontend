@@ -27,7 +27,7 @@
                         </div>
                         <div class="recruitment-infor">
                             <div class="flex justify-between ">
-                                <div class="recruitment-news-name">{{ recruiment.Title }}</div>
+                                <div class="recruitment-news-name" @click="detailPage(recruiment.RecruitmentID)">{{ recruiment.Title }}</div>
                                 <div class="recruitment-option">
                                     <Icon
                                         :icon="'entypo:dots-three-vertical'"
@@ -173,11 +173,6 @@ const searchDefaultConfig: DxTextBox = {
     },
 };
 
-const textBoxConfig: DxTextBox = {
-    placeholder: t("base.general.typeValue"),
-    onValueChanged: (e) => {
-    },
-};
 
 const buttonConfig = ref<DxButton>({
     type: ButtonType.default,
@@ -245,6 +240,9 @@ async function handleDeleteRecruitment(recruitmentID: number){
     }
 }
 
+function detailPage(recruitmentId: number){
+    router.push({name: "recruitment-news-detail", params:{id: recruitmentId}})
+}
 
 </script>
 

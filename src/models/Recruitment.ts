@@ -32,6 +32,7 @@ export class RecruitmentModel extends BaseModel {
     CarrerName: string = ''
     WorkLocationID: number = 0
     WorkLocationName: string = ''
+    Status: number = 1
     RecruitmentRounds: RecruitmentRoundModel[] = recruitmentRounds
     RecruitmentPeriods: RecruitmentPeriodModel[] = []
 }

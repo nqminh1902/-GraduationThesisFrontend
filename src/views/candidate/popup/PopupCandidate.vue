@@ -10,7 +10,7 @@
             ref="popupRef"
         >
             <template #body>
-                <h2>Thêm ứng viên</h2>
+                <h2>{{ !isEdit ? "Thêm ứng viên" : "Sửa ứng viên" }}</h2>
                 <div class="flex h-full">
                     <div class="flex-1 py-[16px]" style="height: calc(100% - 27px);">
                         <div class="add-cv">
@@ -21,7 +21,17 @@
                             <div class="wrap-file" v-else><span> {{ candidate.AttachmentName }} </span></div>
                             <input type="file" accept=".docx, .pdf, .doc" class="file-input" @change="setCVAttachment"/>
                         </div>
-                        
+                        <div class="w-full d-flex items-center my-1" v-if="recruitmentDetails.length" id="list-recruitment">
+                            <div class="cursor-pointer">Danh sách tin tuyển dụng của ứng viên</div>
+                            <Icon
+                                :icon="'icon-park-outline:down'"
+                                :color="'#FF0000'"
+                                width="16"
+                                height="16"
+                                class="cursor-pointer"
+                                
+                            />
+                        </div>
                         <dx-scroll-view :height="'calc(100% - 116px)'">
                             <div class="flex w-full mt-[16px]">
                                 <div class="candidate-avatar">
@@ -73,18 +83,18 @@
                                     <div class="flex">
                                         <div class="field flex-1">
                                             <div class="lable">Trình độ đào tạo <span style="color: red;">*</span></div>
-                                            <base-select-box :config="degreeConfig"/>
+                                            <base-select-box :config="degreeConfig" v-model="candidate.EducationDegreeID"/>
                                         </div>
                                         <div class="w-[12px]"></div>
                                         <div class="field flex-1">
                                             <div class="lable">Nơi đào tạo <span style="color: red;">*</span></div>
-                                            <base-select-box :config="trainingPlaceConfig"/>
+                                            <base-select-box :config="trainingPlaceConfig" v-model="candidate.EducationPlaceID"/>
                                         </div>
                                     </div>
                                     <div class="field">
                                         <div class="lable">Chuyên ngành <span style="color: red;">*</span></div>
                                         <base-select-box
-                                            :config="specializedConfig"
+                                            :config="specializedConfig" v-model="candidate.EducationMajorID"
                                         />
                                     </div>
                                     <div class="flex">
@@ -95,7 +105,7 @@
                                         <div class="w-[12px]"></div>
                                         <div class="field flex-1">
                                             <div class="lable">Nguồn ứng viên <span style="color: red;">*</span></div>
-                                            <base-select-box :config="candidateSourceConfig"/>
+                                            <base-select-box :config="candidateSourceConfig" v-model="candidate.ChannelID"/>
                                         </div>
                                     </div>
                                     <div class="field">
@@ -171,6 +181,22 @@
                 </div>
             </template>
         </base-popup>
+
+        <DxPopover 
+        target="#list-recruitment"
+        show-event="click"
+        :visible="false"
+        :hideOnOutsideClick="true"
+        position="bottom"
+        width="372px"
+        >
+        <div class="">
+            <div class="" v-for="item in recruitmentDetails" :key="item.RecruitmentDetailID">
+                <div class="">{{ item.Title }} <span>Vòng tuyển dụng: {{ item.RecruitmentRoundName }}</span></div>
+                <div class="">Trạng thái: {{ getStatus(item) }}</div>
+            </div>
+        </div>
+        </DxPopover>
 </template>
 <script lang="ts" setup>
 import { DxDateBox, DxNumberBox, DxPopup, DxRadioGroup, DxScrollView, DxSelectBox, DxTextArea, DxTextBox } from "devextreme-vue";
@@ -192,17 +218,21 @@ import {
 import { degrees, trainingPlaces, specializeds, candidateFrom } from "../../../mocks";
 import { Icon } from "@iconify/vue";
 import { CandidateModel, WorkExperientModel } from "../../../models/CandidateModel";
+import { DxPopover } from 'devextreme-vue/popover';
 import CandidateApi from "../../../apis/candidate/candidate-api"
+import RecruitmentDetailApi from "@/apis/recruitment-detail-api/recruitment-detail-api";
 import { useToastStore } from "../../../stores";
 import { StateEnum, ToastType } from "../../../enums";
 import axios from "axios";
 import _ from 'lodash';    
 import { isEnumDeclaration } from "typescript";
+import { RecruitmentDetailModel } from "../../../models";
 
 const props = withDefaults(defineProps<{
     isShowPopup: boolean
     isEdit: boolean
     candidateID? : number
+    recruitmentDetail?: RecruitmentDetailModel
 }>(), {
     isShowPopup: false,
     isEdit: false
@@ -210,7 +240,11 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits(["onClose", "onSave"]);
 
+const recruitmentDetails = ref<RecruitmentDetailModel[]>([])
+
 const candidateApi = new CandidateApi()
+
+const recruitmentDetailApi = new RecruitmentDetailApi()
 
 const toastStore = useToastStore();
 
@@ -227,6 +261,7 @@ const widthPopup = ref(500)
 
 if(props.isEdit && props.candidateID){
     getCandidateByID()
+    getRecruitmentDetailID()
 }
 
 const candidateNameConfig = ref<DxTextBox>({
@@ -289,7 +324,6 @@ const trainingPlaceConfig = ref<DxSelectBox>({
     dataSource: trainingPlaces,
     searchEnabled: true,
     onItemClick(e) {
-        candidate.value.EducationPlaceID = e.itemData.id
         candidate.value.EducationPlaceName = e.itemData.text 
     },
 })
@@ -303,7 +337,6 @@ const degreeConfig = ref<DxSelectBox>({
     dataSource: degrees,
     searchEnabled: true,
     onItemClick(e) {
-        candidate.value.EducationDegreeID = e.itemData.id 
         candidate.value.EducationDegreeName = e.itemData.text 
     },
 })
@@ -317,7 +350,6 @@ const specializedConfig = ref<DxSelectBox>({
     dataSource: specializeds,
     searchEnabled: true,
     onItemClick(e) {
-        candidate.value.EducationMajorID = e.itemData.id
         candidate.value.EducationMajorName = e.itemData.text
     },
 })
@@ -346,7 +378,6 @@ const candidateSourceConfig = ref<DxSelectBox>({
     dataSource: candidateFrom,
     searchEnabled: true,
     onItemClick(e) {
-        candidate.value.ChannelID = e.itemData.id 
         candidate.value.ChannelName =  e.itemData.text 
     },
 })
@@ -381,6 +412,15 @@ async function getCandidateByID(){
     }
 }
 
+async function getRecruitmentDetailID(){
+    const res = await recruitmentDetailApi.getByCandidateID(props.candidateID + "")
+    if(res.data.Success){
+        recruitmentDetails.value = res.data.Data
+        console.log(recruitmentDetails.value);
+        
+    }
+}
+
 
 function beforeSave(){
     workExperients.value.forEach((item) => {
@@ -399,6 +439,9 @@ async function handleSave(){
     candidate.value.Mobile = candidate.value.Mobile?.toString()
     if(!props.isEdit){
         candidate.value.WorkExperients = workExperients.value
+        if(props.recruitmentDetail){
+            candidate.value.RecruitmentDetail = props.recruitmentDetail
+        }
         const res = await candidateApi.insert(candidate.value)
         if(res.data.Success){
             emit("onClose")
@@ -467,6 +510,16 @@ function setCVAttachment(e: any){
 
 function handleClose(){
     emit("onClose")
+}
+
+function getStatus(item: RecruitmentDetailModel){
+    if(item.Status == 1 && item.IsEmployee == 1){
+        return "Nhân viên"
+    }else if(item.Status == 1){
+        return "Đang tuyển dụng"
+    }else{
+        return "Bị loại"
+    }
 }
 </script>
 <style lang="scss">

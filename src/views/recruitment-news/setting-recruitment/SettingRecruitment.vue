@@ -9,7 +9,7 @@
                 class="cursor-pointer"
                 @click="backPage"
             />
-            <div class="title">Thêm mới</div>
+            <div class="title">{{ isEdit ? "Sửa tin" : "Thêm mói" }}</div>
         </div>
         <div class="setting-content">
             <div class="setting-sidebar">
@@ -88,11 +88,11 @@ const recruitmentApi = new RecruitmentApi()
 const toastStore = useToastStore();
 const route = useRoute()
 const router = useRouter()
-let isEdit = false
+let isEdit = ref(false)
 
 if(route.params.id != "0"){
     getRecruitment()
-    isEdit = true
+    isEdit.value = true
 }else{
     recruitment.value = new RecruitmentModel()
 }
@@ -112,7 +112,7 @@ const buttonSaveConfig = ref<DxButton>({
     text: "Lưu và đăng tin",
     stylingMode: ButtonStylingMode.contained,
     async onClick(e) {
-        if(!isEdit){
+        if(!isEdit.value){
             recruitment.value.RecruitmentRounds.forEach((round, index) => {
                 round.SordOrder = index + 1
             })

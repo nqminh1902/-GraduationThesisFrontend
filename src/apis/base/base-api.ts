@@ -35,7 +35,7 @@ export default class BaseApi<T> {
         return this.baseApi.post(this.controller + `/bulk`, param);
     }
 
-    update(id:number,param: T): Promise<AxiosResponse<ServiceResponse>> {
+    update(id: number, param: T): Promise<AxiosResponse<ServiceResponse>> {
         return this.baseApi.put(this.controller + `/${id}`, param);
     }
 
@@ -47,7 +47,7 @@ export default class BaseApi<T> {
         return this.baseApi.delete(this.controller + `/${id}`);
     }
 
-    deleteBulk(param: T[]): Promise<AxiosResponse<ServiceResponse>> {
-        return this.baseApi.post(this.controller + '/batch', param);
+    deleteBulk(ids: number[]): Promise<AxiosResponse<ServiceResponse>> {
+        return this.baseApi.post(this.controller + '/deleteBulk', ids);
     }
 }

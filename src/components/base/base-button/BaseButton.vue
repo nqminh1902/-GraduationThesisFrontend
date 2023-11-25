@@ -68,11 +68,11 @@ function endLoading() {
 function stylingButton() {
     const button = buttonRef.value?.instance?.element();
 
-    if (buttonConfig?.type == ButtonType.default) {
-        button.classList.add("default-btn");
-    } else if (buttonConfig?.type == ButtonType.normal) {
-        button.classList.add("normal-btn");
-    }
+    // if (buttonConfig?.type == ButtonType.default) {
+    //     button.classList.add("default-btn");
+    // } else if (buttonConfig?.type == ButtonType.normal) {
+    //     button.classList.add("normal-btn");
+    // }
 }
 // #endregion
 
@@ -84,14 +84,14 @@ defineExpose({
 <style lang="scss">
 .default-btn {
     position: relative;
-    background-color: var(--app-color-primary) !important;
+    background-color: #2680EB !important;
     font-weight: 600;
     border-radius: 0px;
     transition: all 0.4s ease 0s;
     font-size: 14px;
+    color: var(--app-color-white);
     &:hover {
-        color: var(--app-color-white);
-        background-color: var(--app-color-pure-black) !important;
+        opacity: 0.8;;
     }
 }
 

@@ -17,3 +17,8 @@ export const handleAppMounted = () => {
 export const translateScreen = (yCoord: number, xCoord: number = 0) => {
     window.scrollTo(xCoord, yCoord);
 };
+
+export const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}

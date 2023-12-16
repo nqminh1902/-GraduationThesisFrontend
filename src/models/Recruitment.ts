@@ -1,4 +1,4 @@
-import { BaseModel, RecruitmentPeriodModel, RecruitmentRoundModel } from ".";
+import { BaseModel, RecruitmentBroadModel, RecruitmentPeriodModel, RecruitmentRoundModel } from ".";
 import { recruitmentRounds } from "../mocks"
 
 export class RecruitmentModel extends BaseModel {
@@ -35,4 +35,5 @@ export class RecruitmentModel extends BaseModel {
     Status: number = 1
     RecruitmentRounds: RecruitmentRoundModel[] = recruitmentRounds
     RecruitmentPeriods: RecruitmentPeriodModel[] = []
+    RecruitmentBroads: RecruitmentBroadModel[] = []
 }

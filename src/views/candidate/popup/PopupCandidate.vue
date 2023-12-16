@@ -2,7 +2,7 @@
     <base-popup
             v-if="isShowPopup"
             :config="popupConfig"
-            :showBtnFooter="true"
+            :showBtnFooter="!isView ? true : false"
             :popupVisible="isShowPopup"
             @close="handleClose"
             @save="handleSave"
@@ -10,7 +10,7 @@
             ref="popupRef"
         >
             <template #body>
-                <h2>{{ !isEdit ? "Thêm ứng viên" : "Sửa ứng viên" }}</h2>
+                <h2>{{ !isEdit ? "Thêm ứng viên" : !isView ? "Sửa ứng viên" : "Chi tiết ứng viên" }}</h2>
                 <div class="flex h-full">
                     <div class="flex-1 py-[16px]" style="height: calc(100% - 27px);">
                         <div class="add-cv">
@@ -47,65 +47,74 @@
                                     <div class="field">
                                         <div class="lable">Tên ứng viên <span style="color: red;">*</span></div>
                                         <base-text-box
-                                            :config="candidateNameConfig" v-model="candidate.CandidateName"
+                                            :config="candidateNameConfig" v-model="candidate.CandidateName" :class="{'border-red': errorMessage.CandidateName}"
                                         />
+                                        <div class="validate-string">{{ errorMessage.CandidateName }}</div>
                                     </div>
                                     <div class="flex">
                                         <div class="field flex-1">
                                             <div class="lable">Ngày sinh <span style="color: red;">*</span></div>
-                                            <base-date-box :config="dateOfBirdthConfig" v-model="candidate.Birthday"/>
+                                            <base-date-box :config="dateOfBirdthConfig" v-model="candidate.Birthday" :class="{'border-red': errorMessage.BirthDay}"/> 
+                                            <div class="validate-string">{{ errorMessage.BirthDay }}</div>
                                         </div>
                                         <div class="w-[12px]"></div>
                                         <div class="field flex-1">
                                             <div class="lable">Giới tính <span style="color: red;">*</span></div>
-                                            <base-radio-group :config="GenderConfig" v-model="candidate.Gender"/>
+                                            <base-radio-group :config="GenderConfig" v-model="candidate.Gender" />
                                         </div>
                                     </div>
                                     <div class="flex">
                                         <div class="field flex-1">
                                             <div class="lable">Số điện thoại <span style="color: red;">*</span></div>
-                                            <base-number-box :config="phoneConfig" v-model="candidate.Mobile"/>
+                                            <base-number-box :config="phoneConfig" v-model="candidate.Mobile" :class="{'border-red': errorMessage.Mobile}"/>
+                                            <div class="validate-string">{{ errorMessage.Mobile }}</div>
                                         </div>
                                         <div class="w-[12px]"></div>
                                         <div class="field flex-1">
                                             <div class="lable">Email <span style="color: red;">*</span></div>
                                             <base-text-box
-                                                :config="emailConfig" v-model="candidate.Email"
+                                                :config="emailConfig" v-model="candidate.Email" :class="{'border-red': errorMessage.Email}"
                                             />
+                                            <div class="validate-string">{{ errorMessage.Email }}</div>
                                         </div>
                                     </div>
                                     <div class="field">
                                         <div class="lable">Địa chỉ <span style="color: red;">*</span></div>
                                         <base-text-box
-                                            :config="addressConfig" v-model="candidate.Address"
+                                            :config="addressConfig" v-model="candidate.Address" :class="{'border-red': errorMessage.Address}"
                                         />
+                                        <div class="validate-string">{{ errorMessage.Address }}</div>
                                     </div>
                                     <div class="flex">
                                         <div class="field flex-1">
                                             <div class="lable">Trình độ đào tạo <span style="color: red;">*</span></div>
-                                            <base-select-box :config="degreeConfig" v-model="candidate.EducationDegreeID"/>
+                                            <base-select-box :config="degreeConfig" v-model="candidate.EducationDegreeID" :class="{'border-red': errorMessage.Degree}"/>
+                                            <div class="validate-string">{{ errorMessage.Degree }}</div>
                                         </div>
                                         <div class="w-[12px]"></div>
                                         <div class="field flex-1">
                                             <div class="lable">Nơi đào tạo <span style="color: red;">*</span></div>
-                                            <base-select-box :config="trainingPlaceConfig" v-model="candidate.EducationPlaceID"/>
+                                            <base-select-box :config="trainingPlaceConfig" v-model="candidate.EducationPlaceID" :class="{'border-red': errorMessage.TrainingPlace}"/>
+                                            <div class="validate-string">{{ errorMessage.TrainingPlace }}</div>
                                         </div>
                                     </div>
                                     <div class="field">
                                         <div class="lable">Chuyên ngành <span style="color: red;">*</span></div>
                                         <base-select-box
-                                            :config="specializedConfig" v-model="candidate.EducationMajorID"
+                                            :config="specializedConfig" v-model="candidate.EducationMajorID" :class="{'border-red': errorMessage.Major}"
                                         />
+                                        <div class="validate-string">{{ errorMessage.Major }}</div>
                                     </div>
                                     <div class="flex">
                                         <div class="field flex-1">
                                             <div class="lable">Ngày ứng tuyển <span style="color: red;">*</span></div>
-                                            <base-date-box :config="applyDateConfig" v-model="candidate.ApplyDate"/>
+                                            <base-date-box :config="applyDateConfig" v-model="candidate.ApplyDate" />
                                         </div>
                                         <div class="w-[12px]"></div>
                                         <div class="field flex-1">
                                             <div class="lable">Nguồn ứng viên <span style="color: red;">*</span></div>
-                                            <base-select-box :config="candidateSourceConfig" v-model="candidate.ChannelID"/>
+                                            <base-select-box :config="candidateSourceConfig" v-model="candidate.ChannelID" :class="{'border-red': errorMessage.Resource}"/>
+                                            <div class="validate-string">{{ errorMessage.Resource }}</div>
                                         </div>
                                     </div>
                                     <div class="field">
@@ -173,6 +182,7 @@
                                 </div>
                             </div>
                         </dx-scroll-view>
+                        <!-- </div> -->
                     </div>  
                     <div class="mx-[12px]" v-if="candidate.AttachmentCV && isEdit"></div>
                     <div class="flex-1 pdfContainer"  v-if="candidate.AttachmentCV && isEdit" >
@@ -199,7 +209,7 @@
         </DxPopover>
 </template>
 <script lang="ts" setup>
-import { DxDateBox, DxNumberBox, DxPopup, DxRadioGroup, DxScrollView, DxSelectBox, DxTextArea, DxTextBox } from "devextreme-vue";
+import { DxDateBox, DxNumberBox, DxPopup, DxRadioGroup, DxSelectBox, DxTextArea, DxTextBox } from "devextreme-vue";
 import { onMounted, onUpdated, ref, watch } from "vue";
 import {
     BaseTable,
@@ -225,18 +235,33 @@ import { useToastStore } from "../../../stores";
 import { StateEnum, ToastType } from "../../../enums";
 import axios from "axios";
 import _ from 'lodash';    
-import { isEnumDeclaration } from "typescript";
 import { RecruitmentDetailModel } from "../../../models";
+import { DxScrollView } from 'devextreme-vue/scroll-view';
+import { validateEmail } from "../../../utils";
 
 const props = withDefaults(defineProps<{
     isShowPopup: boolean
     isEdit: boolean
     candidateID? : number
     recruitmentDetail?: RecruitmentDetailModel
+    isView?: boolean
 }>(), {
     isShowPopup: false,
-    isEdit: false
+    isEdit: false,
+    isView: false
 });
+
+const errorMessage = ref({
+    CandidateName: "",
+    BirthDay: "",
+    Mobile: "",
+    Email: "",
+    Address: "",
+    Degree: "",
+    TrainingPlace: "",
+    Major: "",
+    Resource: ""
+})
 
 const emit = defineEmits(["onClose", "onSave"]);
 
@@ -379,6 +404,7 @@ const candidateSourceConfig = ref<DxSelectBox>({
     searchEnabled: true,
     onItemClick(e) {
         candidate.value.ChannelName =  e.itemData.text 
+        candidate.value.ChannelID = e.itemData.id 
     },
 })
 
@@ -436,6 +462,7 @@ function beforeSave(){
 }
 
 async function handleSave(){
+    if(!validate()) return
     candidate.value.Mobile = candidate.value.Mobile?.toString()
     if(!props.isEdit){
         candidate.value.WorkExperients = workExperients.value
@@ -483,6 +510,7 @@ function setCandidateAvatar(e: any){
     .catch((error) => {
       console.error(error);
     });
+    if(e.target.files) e.target.value = null;
 }
 
 
@@ -506,11 +534,131 @@ function setCVAttachment(e: any){
     .catch((error) => {
       console.error(error);
     });
+    if(e.target.files) e.target.value = null;
 }
 
 function handleClose(){
     emit("onClose")
 }
+
+function validate() : boolean{
+    let result = true
+    if(!candidate.value.CandidateName){
+        errorMessage.value.CandidateName = "Tên ứng viên không được để trống"
+        result = false
+    }
+    if(!candidate.value.Birthday){
+        errorMessage.value.BirthDay = "Ngày sinh không được để trống"
+        result = false
+    }
+    if(!candidate.value.Address){
+        errorMessage.value.Address = "Địa chỉ không được để trống"
+        result = false
+    }
+    if(!candidate.value.Email){
+        errorMessage.value.Email = "Email không được để trống"
+        result = false
+    }
+    if(candidate.value.Email && !validateEmail(candidate.value.Email)){
+        errorMessage.value.Email = "Email không hợp lệ"
+        result = false
+    }
+    if(!candidate.value.Mobile){
+        errorMessage.value.Mobile = "Số điện thoại không được để trống"
+        result = false
+    }
+    if(!candidate.value.EducationDegreeID){
+        errorMessage.value.Degree = "Trình độ đào tạo không được để trống"
+        result = false
+    }
+    if(!candidate.value.EducationMajorID){
+        errorMessage.value.Major = "Chuyên ngành không được để trống"
+        result = false
+    }
+    if(!candidate.value.EducationPlaceID){
+        errorMessage.value.TrainingPlace = "Nơi đào tạo không được để trống"
+        result = false
+    }
+    if(!candidate.value.ChannelID){
+        errorMessage.value.Resource = "Nguồn ứng viên không được để trống"
+        result = false
+    }
+    return result
+}
+
+watch(() => candidate.value.ChannelID, (newVal) => {
+    if(newVal){
+        errorMessage.value.Resource = ""
+    }else{
+        errorMessage.value.Resource = "Nguồn ứng viên không được để trống"
+    }
+})
+
+watch(() => candidate.value.CandidateName, (newVal) => {
+    if(newVal){
+        errorMessage.value.CandidateName = ""
+    }else{
+        errorMessage.value.CandidateName = "Tên ứng viên không được để trống"
+    }
+})
+
+watch(() => candidate.value.Birthday, (newVal) => {
+    if(newVal){
+        errorMessage.value.BirthDay = ""
+    }else{
+        errorMessage.value.BirthDay = "Ngày sinh không được để trống"
+    }
+})
+
+watch(() => candidate.value.Address , (newVal) => {
+    if(newVal){
+        errorMessage.value.Address = ""
+    }else{
+        errorMessage.value.Address = "Địa chỉ không được để trống"
+    }
+})
+
+watch(() => candidate.value.Email, (newVal) => {
+    if(newVal){
+        errorMessage.value.Email = ""
+    }else{
+        errorMessage.value.Email = "Email không được để trống"
+    }
+})
+
+watch(() => candidate.value.Mobile, (newVal) => {
+    if(newVal){
+        errorMessage.value.Mobile = ""
+    }else{
+        errorMessage.value.Mobile = "Số điện thoại không được để trống"
+    }
+})
+
+watch(() => candidate.value.EducationDegreeID, (newVal) => {
+    if(newVal){
+        errorMessage.value.Degree = ""
+    }else{
+        errorMessage.value.Degree = "Trình độ đào tạo không được để trống"
+    }
+})
+
+watch(() => candidate.value.EducationMajorID, (newVal) => {
+    if(newVal){
+        errorMessage.value.Major = ""
+
+    }else{
+        errorMessage.value.Major = "Chuyên ngành không được để trống"
+    }
+})
+
+watch(() => candidate.value.EducationPlaceID, (newVal) => {
+    if(newVal){
+        errorMessage.value.TrainingPlace = ""
+    }else{
+        errorMessage.value.TrainingPlace = "Nơi đào tạo không được để trống"
+    }
+})
+
 
 function getStatus(item: RecruitmentDetailModel){
     if(item.Status == 1 && item.IsEmployee == 1){
@@ -522,7 +670,7 @@ function getStatus(item: RecruitmentDetailModel){
     }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
     .add-cv{
         position: relative;
         text-align: center;
@@ -563,6 +711,7 @@ function getStatus(item: RecruitmentDetailModel){
     }
     .field{
         margin-bottom: 12px;
+        position: relative;
         .lable{
             font-size: 14px;
             color: #1e2633;
@@ -570,6 +719,14 @@ function getStatus(item: RecruitmentDetailModel){
             line-height: 25px!important;
             font-family: Roboto;
             font-weight: 500;
+        }
+        .validate-string{
+            position: absolute;
+            width: 100%;
+            text-overflow: ellipsis;
+            color: red;
+            overflow: hidden;
+            white-space: nowrap;
         }
     }
 .file-input{

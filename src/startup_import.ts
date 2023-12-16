@@ -9,6 +9,5 @@ export const startup = (app: App) => {
     app.use(i18n);
     app.use(clickOutside);
     app.use(copyToClipboard);
-
     return app;
 };

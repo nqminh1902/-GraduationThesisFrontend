@@ -65,28 +65,41 @@
                 <base-text-box 
                     :config="periodNameConfig"
                     v-model="recruitmentPeriod.PeriodName"
+                    :class="{'border-red': errorMessage.PeriodName}"
                 />
+                <div class="validate-string">{{ errorMessage.PeriodName }}</div>
             </div>
             <div class="flex">
                 <div class="field flex-1">
                     <div class="lable">Từ ngày <span style="color: red;">*</span></div>
-                    <base-date-box :config="fromDateConfig" v-model="recruitmentPeriod.StartDate"/>
+                    <base-date-box :config="fromDateConfig" v-model="recruitmentPeriod.StartDate" 
+                    :class="{'border-red': errorMessage.StartDate}"/>
+                    <div class="validate-string">{{ errorMessage.StartDate }}</div>
                 </div>
                 <div class="w-[12px]"></div>
                 <div class="field flex-1">
                     <div class="lable">Đến ngày <span style="color: red;">*</span></div>
-                    <base-date-box :config="toDateConfig" v-model="recruitmentPeriod.EndDate"/>
+                    <base-date-box :config="toDateConfig" v-model="recruitmentPeriod.EndDate"
+                    :class="{'border-red': errorMessage.EndDate}"
+                    />
+                    <div class="validate-string">{{ errorMessage.EndDate }}</div>
                 </div>
             </div>
             <div class="flex">
                 <div class="field flex-1">
                     <div class="lable">Số lượng cần tuyển <span style="color: red;">*</span></div>
-                    <base-number-box :config="recruitedNumberConfig" v-model="recruitmentPeriod.Quantity"/>
+                    <base-number-box :config="recruitedNumberConfig" v-model="recruitmentPeriod.Quantity"
+                    :class="{'border-red': errorMessage.Quantity}"
+                    />
+                    <div class="validate-string">{{ errorMessage.Quantity }}</div>
                 </div>
                 <div class="w-[12px]"></div>
                 <div class="field flex-1">
                     <div class="lable">Chỉ tiêu tháng <span style="color: red;">*</span></div>
-                    <base-date-box :config="targetDate" v-model="recruitmentPeriod.ReportPeriod"/>
+                    <base-date-box :config="targetDate" v-model="recruitmentPeriod.ReportPeriod"
+                    :class="{'border-red': errorMessage.ReportPeriod}"
+                    />
+                    <div class="validate-string">{{ errorMessage.ReportPeriod }}</div>
                 </div>
             </div>
             <div class="w-full py-[16px] flex justify-end">
@@ -121,6 +134,14 @@ import type { Column } from "devextreme/ui/data_grid";
 const recruitmentStore = useRecruitmentStore()
 
 const { recruitment } = storeToRefs(recruitmentStore);
+
+const errorMessage = ref({
+    Quantity: "",
+    ReportPeriod: "",
+    EndDate: "",
+    StartDate: "",
+    PeriodName: ""
+})
 
 const actualQuantity = computed(() => {
     return recruitment.value.RecruitmentPeriods.reduce((acc, curr) => {
@@ -201,6 +222,7 @@ const saveButton = ref<DxButton>({
     text: "Lưu",
     stylingMode: ButtonStylingMode.contained,
     onClick(e) {
+        if(!validate()) return
         if(isEdit.value){
             let period = recruitment.value.RecruitmentPeriods.find((period) => period.RecruitmentPeriodID == recruitmentPeriod.value.RecruitmentPeriodID)
             period ? period = recruitmentPeriod.value : period
@@ -219,6 +241,67 @@ const saveButton = ref<DxButton>({
         recruitment.value.ActualQuantity = actualQuantity.value
         baseTableRef.value.getInstance().option("dataSource", recruitmentPeriods)
     },
+})
+
+function validate(){
+    let result = true
+    if(recruitmentPeriod.value.PeriodName){
+        errorMessage.value.PeriodName = "Tên đợt không được để trống";
+        return false
+    }
+    if(recruitmentPeriod.value.Quantity){
+        errorMessage.value.Quantity = "Số lượng cần tuyển không được để trống";
+        return false
+    }
+    if(recruitmentPeriod.value.ReportPeriod){
+        errorMessage.value.ReportPeriod = "Chỉ tiêu tháng không được để trống";
+        return false
+    }
+    if(recruitmentPeriod.value.StartDate){
+        errorMessage.value.PeriodName = "Ngày bắt đầu không được để trống";
+        return false
+    }
+    if(recruitmentPeriod.value.EndDate){
+        errorMessage.value.PeriodName = "Ngày kết thúc được để trống";
+        return false
+    }
+    return result
+}
+
+watch(() => recruitmentPeriod.value.PeriodName, (newVal) => {
+    if(newVal){
+        errorMessage.value.PeriodName = "";
+    }else{
+        errorMessage.value.PeriodName = "Tên đợt không được để trống";
+    }
+})
+watch(() => recruitmentPeriod.value.Quantity, (newVal) => {
+    if(newVal){
+        errorMessage.value.Quantity = "";
+    }else{
+        errorMessage.value.Quantity = "Số lượng cần tuyển không được để trống";
+    }
+})
+watch(() => recruitmentPeriod.value.ReportPeriod, (newVal) => {
+    if(newVal){
+        errorMessage.value.ReportPeriod = "";
+    }else{
+        errorMessage.value.ReportPeriod = "Chỉ tiêu tháng không được để trống";
+    }
+})
+watch(() => recruitmentPeriod.value.StartDate, (newVal) => {
+    if(newVal){
+        errorMessage.value.PeriodName = "";
+    }else{
+        errorMessage.value.PeriodName = "Ngày bắt đầu không được để trống";
+    }
+})
+watch(() => recruitmentPeriod.value.EndDate, (newVal) => {
+    if(newVal){
+        errorMessage.value.PeriodName = "";
+    }else{
+        errorMessage.value.PeriodName = "Ngày kết thúc được để trống";
+    }
 })
 
 const addPeriodConfig = ref<DxButton>({
@@ -317,17 +400,6 @@ function handleEditPeriod(e: RecruitmentPeriodModel){
                 font-size: 14px;
                 color: #6a727d;
             }
-            .field{
-                margin-bottom: 12px;
-                .lable{
-                    font-size: 14px;
-                    color: #1e2633;
-                    height: 25px!important;
-                    line-height: 25px!important;
-                    font-family: Roboto;
-                    font-weight: 500;
-                }
-            }
             .title-time{
                 font-size: 16px;
                 color: #1E2633;
@@ -338,6 +410,7 @@ function handleEditPeriod(e: RecruitmentPeriodModel){
     }
     .field{
         margin-bottom: 12px;
+        position: relative;
         .lable{
             font-size: 14px;
             color: #1e2633;
@@ -345,6 +418,14 @@ function handleEditPeriod(e: RecruitmentPeriodModel){
             line-height: 25px!important;
             font-family: Roboto;
             font-weight: 500;
+        }
+        .validate-string{
+            position: absolute;
+            width: 100%;
+            text-overflow: ellipsis;
+            color: red;
+            overflow: hidden;
+            white-space: nowrap;
         }
     }
 </style>

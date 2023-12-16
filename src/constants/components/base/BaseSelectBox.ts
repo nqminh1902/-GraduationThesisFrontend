@@ -14,7 +14,4 @@ export const defaultBaseSelectBoxConfig: DxSelectBox = {
     hoverStateEnabled: true,
     searchMode: 'contains',
     placeholder: t('base.general.selectValue'),
-    elementAttr: {
-        class: 'base-select-box',
-    },
 };

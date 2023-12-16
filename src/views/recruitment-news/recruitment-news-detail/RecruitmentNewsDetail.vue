@@ -1,21 +1,21 @@
 <template>
-    <div class="flex flex-col w-full h-full">
+    <div class="flex flex-col w-full" style="height: 100%">
         <div class="w-full px-[24px] pt-[24px] header">
             <div class="flex">
                 <div class="">
                     <Icon
                         :icon="'ph:arrow-left-bold'"
-                        :color="'#FF0000'"
-                        width="20"
-                        height="20"
-                        class="cursor-pointer"
+                        :color="'#2680eb'"
+                        width="26"
+                        height="26"
+                        class="cursor-pointer mt-[6px]"
                         @click="backPage"
                     />
                 </div>
                 <div class="flex-1">
                     <div class="flex items-center">
                         <div class="recruitment-status">
-                            <div class="recruitment-status-dot"></div>
+                            <div :class="'recruitment-status-' + recruitment.Status"></div>
                         </div>
                         <div class="title" :title="recruitment.Title">{{ recruitment.Title }}</div>
                         <div class="edit-btn flex items-center cursor-pointer">
@@ -37,22 +37,39 @@
                         <div class="sub-content cursor-pointer"  @click="handleOpenMoreInfor(recruitment.RecruitmentID)" :id="'more-popover'">Xem thêm</div>
                     </div>
                 </div>
-                <div class="add-candidate">
-                    <base-button :config="buttonConfig" />
+                <div class="flex">
+                    <button class="candidate-btn" @click="handleAddCandidate">
+                        <Icon
+                            :icon="'tabler:plus'"
+                            :color="'#ffffff'"
+                            width="20"
+                            height="20"
+                        />
+                        <div class="text-white ml-[4px]">Thêm ứng viên</div>
+                    </button>
+                    <button class="option-btn" id="option">
+                        <Icon
+                            :icon="'ep:arrow-down-bold'"
+                            :color="'#ffffff'"
+                            width="20"
+                            height="20"
+                        />
+                    </button>
                 </div>
             </div>
             <div class="tab-detail flex">
                 <div class="tab-list flex-1 flex">
                     <div class="py-[8px] px-[16px] tab-item cursor-pointer" :class="currentTab==1 && 'active'" @click="handleActiveTab(1)">Ứng viên</div>
                     <div class="py-[8px] px-[16px] tab-item cursor-pointer" :class="currentTab==2 && 'active'" @click="handleActiveTab(2)">Lịch phỏng vấn</div>
+                    <div class="py-[8px] px-[16px] tab-item cursor-pointer" :class="currentTab==3 && 'active'" @click="handleActiveTab(3)">Báo cáo</div>
                 </div>
                 
                 <base-select-box ref="periodRef" :config="periodConfig" v-model="currentPeriod" v-if="recruitment.RecruitmentPeriods.length"/>
-                <div class="tab-status rounded-[4px] ml-[8px] flex items-center cursor-pointer" :class="detailStatus" id="status">
+                <div class="tab-status rounded-[4px] ml-[8px] flex items-center cursor-pointer" :class="recruitment.Status == 1 ? 'publish' : 'stop'" id="status">
                     <div class="recruitment-status">
-                        <div class="recruitment-status-dot"></div>
+                        <div :class="'recruitment-status-' + recruitment.Status"></div>
                     </div>
-                    <div class="">Công khai</div>
+                    <div class="">{{ recruitment.Status == 1 ? "Tuyển dụng" : "Ngưng tuyển dụng" }}</div>
                     <Icon
                         :icon="'icon-park-outline:down'"
                         width="20"
@@ -62,7 +79,7 @@
                 </div>
             </div>
         </div>
-        <div class="w-full flex-1 bg-[#f5f7f8] p-[16px]">
+        <div class="w-full bg-[#f5f7f8] p-[8px]" style="height: calc(100% - 173px);" v-show="currentTab == 1">
             <div class="w-full h-full rounded-[4px] bg-white">
                 <div class="w-full h-[56px] flex items-center px-[16px]">
                     <div class="flex-1 flex" >
@@ -88,7 +105,7 @@
                 </div>
                 <div class="w-full h-[56px] flex items-center" v-if="selectedRowKey.length == 0">
                     <dx-scroll-view width="100%" direction="horizontal">
-                        <div class="flex items-center w-full h-[32px]">
+                        <div class="flex items-center w-full">
                             <div class="item-content" @click="handleClickRound(item.RecruitmentRoundID)" v-for="item in recruitment.RecruitmentRounds" :key="item.RecruitmentRoundID">
                                 <div class="text-center text-xl font-bold" :class="currentRound == item.RecruitmentRoundID && 'text-[#2680eb]'">{{ handleShowTotal(item.RecruitmentRoundID) }}</div>
                                 <div class="round-name" :class="currentRound == item.RecruitmentRoundID && 'text-[#2680eb]'">{{ item.RecruitmentRoundName }}</div>
@@ -97,19 +114,23 @@
                     </dx-scroll-view>
                 </div>
                 <div class="w-full h-[56px] flex items-center" v-else>
+                    <dx-scroll-view width="100%" direction="horizontal">
                     <div class="flex items-center w-full h-[32px]">
-                        <div class="d-flex items-center ml-[16px]">
-                            <span class="mr-[4px]">Đã chọn: </span>
-                            <b>{{ selectedRowKey.length }}</b>
+                            <div class="d-flex items-center ml-[16px]">
+                                <span class="mr-[4px]">Đã chọn: </span>
+                                <b>{{ selectedRowKey.length }}</b>
+                            </div>
+                            <base-button :config="changeRoundConfig" class=" ml-[12px]"/>
+                            <base-button :config="EliminateConfig" class=" ml-[12px]"/>
+                            <base-button :config="ScheduleConfig" class=" ml-[12px]"/>
+                            <base-button :config="ChangeRecruitmentConfig" class=" ml-[12px]"/>
+                            <base-button :config="EmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
+                            <base-button :config="RecruitmentContinueConfig" class=" ml-[12px]" v-if="currentStatus == 2"/>
+                            <base-button :config="RevokeEmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
+                            <base-button :config="DeleteMultipleConfig" class=" ml-[12px]"/>
+                            <base-button :config="RemoveFromRecruitConfig" class=" ml-[12px]"/>
                         </div>
-                        <base-button :config="changeRoundConfig" class=" ml-[12px]"/>
-                        <base-button :config="EliminateConfig" class=" ml-[12px]"/>
-                        <base-button :config="EmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
-                        <base-button :config="RecruitmentContinueConfig" class=" ml-[12px]" v-if="currentStatus == 2"/>
-                        <base-button :config="RevokeEmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
-                        <base-button :config="DeleteMultipleConfig" class=" ml-[12px]"/>
-                        <base-button :config="RemoveFromRecruitConfig" class=" ml-[12px]"/>
-                    </div>
+                    </dx-scroll-view>
                 </div>
                 <div class="w-full" style="height:  calc(100% - 56px - 56px - 46px);">
                     <base-table
@@ -141,6 +162,12 @@
                 />
             </div>
         </div>
+        <div class="w-full bg-[#f5f7f8]" style="height: calc(100% - 173px);" v-if="currentTab == 2"> 
+            <schedule-tab :currentPeriod="currentPeriod" :recruitmentID="recruitmentDetail.RecruitmentID" @show-popup-add="isShowPopupSchedule = true"/>
+        </div>
+        <div class="w-full bg-[#f5f7f8]" style="height: calc(100% - 156px);" v-if="currentTab == 3"> 
+            <report-tab :currentPeriod="currentPeriod" :recruitmentID="recruitmentDetail.RecruitmentID"/>
+        </div>
     </div>
     <popup-candidate v-if="isShowPopup" :isShowPopup="isShowPopup" :recruitmentDetail="recruitmentDetail" :candidateID="candidateID" :is-edit="isUpdate" @onClose="isShowPopup = false" @on-save="handleSaveCandidate(2)"></popup-candidate>
     <popup-change-round v-if="showPopupChangeRound" :ids="selectedRowKey" :isShowPopup="showPopupChangeRound" @onSave="handleSaveCandidate(1)" @onClose="showPopupChangeRound = false" :recruitmentRound="recruitment.RecruitmentRounds"></popup-change-round>
@@ -148,7 +175,10 @@
     <popup-employee v-if="isShowPopupEmployee" :ids="selectedRowKey" :recruitmentID="recruitment.RecruitmentID" :isShowPopup="isShowPopupEmployee" @onSave="handleSaveCandidate(4)" @onClose="isShowPopupEmployee = false"></popup-employee>
     <popup-revoke-employee v-if="isShowPopupRevokeEmployee" :ids="selectedRowKey" :recruitmentID="recruitment.RecruitmentID" :isShowPopup="isShowPopupRevokeEmployee" @onSave="handleSaveCandidate(5)" @onClose="isShowPopupRevokeEmployee = false"></popup-revoke-employee>
     <popup-continue-recruit v-if="isShowPopupContinueRecruit" :ids="selectedRowKey" :recruitmentID="recruitment.RecruitmentID" :isShowPopup="isShowPopupContinueRecruit" @onSave="handleSaveCandidate(6)" @onClose="isShowPopupContinueRecruit = false"></popup-continue-recruit>
-    
+    <popup-recruitment-schedule v-if="isShowPopupSchedule" :recruitmentBroads="recruitment.RecruitmentBroads" :selectedRecruitmentDetail="selectedRowData" :recruitmentID="recruitment.RecruitmentID" :isShowPopup="isShowPopupSchedule" @onSave="handleSaveCandidate(7)" @onClose="isShowPopupSchedule = false"/>
+    <popup-change-recruitment v-if="isShowPopupChangeRecruitment" :selectedKey="selectedRowKey" :recruitmentID="recruitment.RecruitmentID" :isShowPopup="isShowPopupChangeRecruitment" @onSave="handleSaveCandidate(8)" @onClose="isShowPopupChangeRecruitment = false"/>
+    <popup-import-candidate v-if="isShowPopupImport" :isShowPopup="isShowPopupImport" :recruitmentDetail="recruitmentDetail" @onClose="isShowPopupImport = false" @on-save="handleSaveCandidate(9)"></popup-import-candidate>
+
     <DxPopover 
         target="#more-popover"
         show-event="click"
@@ -172,21 +202,21 @@
         width="250"
         >
         <div class="">
-            <div class="flex cursor-pointer hover:bg-[#e1eeffcc] p-[8px] hover:rounded-[4px]" v-if="recruitment.Status != 2">
+            <div class="flex cursor-pointer hover:bg-[#e1eeffcc] p-[8px] hover:rounded-[4px]" v-if="recruitment.Status != 2" @click="handleUpdateStatus(2)">
                 <div class="recruitment-status items-center flex" style="margin-left: 0;">
-                    <div class="recruitment-status-dot" style="background-color: red;"></div>
+                    <div class="recruitment-status-2"></div>
                 </div>
                 <div class="flex-1">
                     <div class="font-bold">Ngừng nhận hồ sơ</div>
                     <div class="">Tin sẽ được gỡ khỏi các kênh tuyển dụng. Không cho phép nộp đơn ứng tuyển</div>
                 </div>
             </div>
-            <div class="flex cursor-pointer hover:bg-[#e1eeffcc] p-[8px] hover:rounded-[4px] mt-[12px]"  v-if="recruitment.Status != 1">
+            <div class="flex cursor-pointer hover:bg-[#e1eeffcc] p-[8px] hover:rounded-[4px] mt-[12px]"  v-if="recruitment.Status != 1" @click="handleUpdateStatus(1)">
                 <div class="recruitment-status items-center flex" style="margin-left: 0;">
-                    <div class="recruitment-status-dot"></div>
+                    <div class="recruitment-status-1"></div>
                 </div>
                 <div class="flex-1">
-                    <div class="font-bold">Nhận hồ sơ</div>
+                    <div class="font-bold">Tuyển dụng</div>
                     <div class="">Thiết tục nhận hồ sơ</div>
                 </div>
             </div>
@@ -215,6 +245,26 @@
             </div>
         </div>
     </DxPopover>
+    <DxPopover 
+        :target="'#option'"
+        show-event="click"
+        :visible="false"
+        :hideOnOutsideClick="true"
+        position="bottom"
+        width="auto"
+        height="auto"
+        >
+            <div class="flex items-center h-[35px] cursor-pointer icon-export" @click="isShowPopupImport = true">
+                <Icon
+                    :icon="'mdi:import'"
+                    :color="'#7A8188'"
+                    width="24"
+                    height="24"
+                    class="mx-[4px]"
+                />
+                <div class="">Nhập khẩu</div>
+            </div>
+    </DxPopover>
 </template>
 <script setup lang="ts">
 import { Icon } from "@iconify/vue";
@@ -240,6 +290,7 @@ import PopupEmployee from "./popup/PopupEmployee.vue"
 import PopupRevokeEmployee from "./popup/PopupRevokeEmployee.vue"
 import PopupContinueRecruit from "./popup/PopupContinueRecruit.vue"
 import { useRecruitmentStore } from "../../../stores";
+import PopupImportCandidate from "../../candidate/popup/PopupImportCandidate.vue"
 import { DxPopover } from 'devextreme-vue/popover';
 import { storeToRefs } from "pinia";
 import RecruitmentApi from "../../../apis/recruitment/recruitment-api"
@@ -249,6 +300,10 @@ import type { Column } from "devextreme/ui/data_grid";
 import CandidateApi from "../../../apis/candidate/candidate-api"
 import RecruitmentDetailApi from "../../../apis/recruitment-detail-api/recruitment-detail-api"
 import { useToastStore } from "../../../stores";
+import ScheduleTab from "./tab/ScheduleTab.vue"
+import PopupRecruitmentSchedule from "./popup/PopupRecruitmentSchedule.vue"
+import PopupChangeRecruitment from "./popup/PopupChangeRecruitment.vue";
+import ReportTab from "./tab/ReportTab.vue"
 
 const recruitmentStore = useRecruitmentStore()
 const toastStore = useToastStore();
@@ -256,8 +311,6 @@ const {recruitment} = storeToRefs(recruitmentStore)
 const recruitmentApi = new RecruitmentApi()
 const candidateApi = new CandidateApi();
 const recruitmentDetailApi = new RecruitmentDetailApi();
-
-
 const route = useRoute()
 const router = useRouter()
 const isShowPopup = ref(false)
@@ -282,20 +335,9 @@ const currentRound = ref(0)
 const selectedRowData = ref<RecruitmentDetailModel[]>([])
 const selectedRowKey = ref<number[]>([])
 const showPopupChangeRound = ref(false)
+const isShowPopupImport = ref(false)
 let dataSource: any[] = []
 
-const buttonConfig = ref<DxButton>({
-    type: ButtonType.default,
-    height: 32,
-    text: "Thêm ứng viên",
-    stylingMode: ButtonStylingMode.contained,
-    icon: "plus",
-    onClick(e) {
-        isShowPopup.value = true;
-        isUpdate.value = false;
-        candidateID.value = undefined
-    },
-});
 
 const changeRoundConfig = ref<DxButton>({
     type: ButtonType.success,
@@ -325,6 +367,31 @@ const RecruitmentContinueConfig = ref<DxButton>({
     stylingMode: ButtonStylingMode.outlined,
     onClick(e) {
         isShowPopupContinueRecruit.value = true
+    },
+})
+
+const isShowPopupSchedule = ref(false)
+
+const isShowPopupChangeRecruitment = ref(false)
+
+const ScheduleConfig = ref<DxButton>({
+    type: ButtonType.default,
+    height: '100%',
+    text: "Đặt lịch",
+    stylingMode: ButtonStylingMode.outlined,
+    onClick(e) {
+        isShowPopupSchedule.value = true
+    },
+})
+
+const ChangeRecruitmentConfig = ref<DxButton>({
+    type: ButtonType.default,
+    height: '100%',
+    text: "Chuyển sang tin khác",
+    stylingMode: ButtonStylingMode.contained,
+    icon: "arrowright",
+    onClick(e) {
+        isShowPopupChangeRecruitment.value = true
     },
 })
 
@@ -541,6 +608,12 @@ const tableConfig = ref<DxDataGrid>({
     },
 });
 
+function handleAddCandidate(){
+    isShowPopup.value = true;
+    isUpdate.value = false;
+    candidateID.value = undefined
+}
+
 getRecruitment()
 
 async function getRecruitment(){
@@ -629,6 +702,15 @@ function handleSaveCandidate(number: number){
     }else if(number == 6){
         isShowPopupContinueRecruit.value = false
     }
+    else if(number == 7){
+        isShowPopupSchedule.value = false
+    }
+    else if(number == 8){
+        isShowPopupChangeRecruitment.value = false
+    }
+    else if(number == 9){
+        isShowPopupImport.value = false
+    }
     else{
         isShowPopup.value = false
     }
@@ -701,8 +783,45 @@ function handleClickRound(id: number){
 function backPage(){
     router.go(-1)
 }
+
+async function handleUpdateStatus(status: number){
+    const res = await recruitmentApi.updateRecruitmentStatus(recruitment.value.RecruitmentID, status)
+    if(res.data.Success){
+        toastStore.toggleToast(true, "Cập nhật trạng thái tin thành công", ToastType.success)
+        recruitment.value.Status = status
+    }else{
+        toastStore.toggleToast(true, "Cập nhật trạng thái tin thất bại", ToastType.error)
+    }
+}
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
+.icon-export{
+    width: 140px;
+    &:hover{
+        background-color: #E7F1FF;
+    }
+}
+.candidate-btn{
+    width: auto;
+    font-weight: 500;
+    font-size: 14px!important;
+    height: 36px!important;
+    padding: 8px 12px!important;
+    border-radius: 4px 0 0 4px;
+    display: flex;
+    align-items: center;
+    background-color: #2680eb!important;
+    border-right: 1px solid #ffffff;
+}
+.option-btn{
+    width: auto;
+    font-weight: 500;
+    font-size: 14px!important;
+    height: 36px!important;
+    padding: 8px 12px!important;
+    border-radius: 0px 4px 4px 0px;
+    background-color: #2680eb!important;
+}
 .publish{
     border: solid 1px #48bb56!important;
     color: #48bb56!important;
@@ -743,8 +862,15 @@ function backPage(){
 .recruitment-status{
     margin: 0 16px;
     width: fit-content;
-    .recruitment-status-dot{
+    .recruitment-status-1{
         background-color: #48bb56 ;
+        width: 10px;
+        height: 10px;
+        border-radius:50%;
+    }
+
+    .recruitment-status-2{
+        background-color: red ;
         width: 10px;
         height: 10px;
         border-radius:50%;

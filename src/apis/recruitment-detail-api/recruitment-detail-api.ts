@@ -16,8 +16,8 @@ export default class RecruitmentDetailApi extends BaseApi<RecruitmentDetailModel
         return this.baseApi.post(this.controller + `/changeRound`, { recruitmentRound, ids });
     }
 
-    changeEliminateCandidate(ids: number[], eliminateID: number, recruitmentID: number): Promise<AxiosResponse<ServiceResponse>> {
-        return this.baseApi.post(this.controller + `/eliminate/${eliminateID}/${recruitmentID}`, ids);
+    changeEliminateCandidate(ids: number[], eliminateID: number, recruitmentID: number, isSendMail: boolean = false): Promise<AxiosResponse<ServiceResponse>> {
+        return this.baseApi.post(this.controller + `/eliminate/${eliminateID}/${recruitmentID}/${isSendMail}`, ids);
     }
 
     getEliminateReason(): Promise<AxiosResponse<ServiceResponse>> {
@@ -42,5 +42,9 @@ export default class RecruitmentDetailApi extends BaseApi<RecruitmentDetailModel
 
     RemoveFromRecruitment(ids: number[], recruitmentID: number): Promise<AxiosResponse<ServiceResponse>> {
         return this.baseApi.post(this.controller + `/remove-from-recruit/${recruitmentID}`, ids);
+    }
+
+    changeRecruitment(ids: number[], recruitmentID: number, choose: number, recruitmentRound: number, period: number = 0): Promise<AxiosResponse<ServiceResponse>> {
+        return this.baseApi.post(this.controller + `/change-recruitment/${recruitmentID}/${choose}/${recruitmentRound}/${period}`, ids);
     }
 }

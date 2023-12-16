@@ -63,11 +63,11 @@ export const recruitmentSidebar = [
         title: "Lịch",
         name: "schedule"
     },
-    // {
-    //     icon: "material-symbols:task-outline",
-    //     title: "Công việc",
-    //     name: "task"
-    // },
+    {
+        icon: "lets-icons:setting-line",
+        title: "Thiết lập",
+        name: "setting"
+    },
     // {
     //     icon: "mdi:report-pie-outline",
     //     title: "Báo cáo",

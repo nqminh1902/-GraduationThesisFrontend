@@ -23,7 +23,7 @@
                 <div class="list-item" v-for="recruiment in recruitments" :key="recruiment.RecruitmentID">
                     <div class="recruitment-news-infor">
                         <div class="recruitment-status">
-                            <div class="recruitment-status-dot"></div>
+                            <div :class="'recruitment-status-' + recruiment.Status"></div>
                         </div>
                         <div class="recruitment-infor">
                             <div class="flex justify-between ">
@@ -169,7 +169,9 @@ const searchDefaultConfig: DxTextBox = {
         },
     ],
     onValueChanged: (e) => {
-       
+        filterPaging.SearchValue = e.value
+        recruitments.value = []
+        getRecruitmentNews()
     },
 };
 
@@ -200,6 +202,9 @@ function handleOpenMoreInfor(recruimnetID: number){
 }
 
 async function getRecruitmentNews(){
+    filterPaging.Collums = ["Title", "JobPositionName"]
+    filterPaging.PageIndex = 1
+    filterPaging.PageSize = 1000
     const res = await recruitmentApi.getFilterPaging(filterPaging);
         if (res) {
             recruitments.value.push(...res.data.Data.Data);
@@ -291,8 +296,16 @@ function detailPage(recruitmentId: number){
                     margin-right: 12px;
                     height: 58px;
                     width: fit-content;
-                    .recruitment-status-dot{
-                        background-color: #48bb56 !important;
+                    .recruitment-status-1{
+                        background-color: #48bb56 ;
+                        width: 10px;
+                        height: 10px;
+                        border-radius:50%;
+                        margin-top: 6px;
+                    }
+
+                    .recruitment-status-2{
+                        background-color: red ;
                         width: 10px;
                         height: 10px;
                         border-radius:50%;

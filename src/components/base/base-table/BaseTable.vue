@@ -47,7 +47,6 @@
 </template>
 <script lang="ts" setup>
 import { DxDataGrid } from "devextreme-vue/data-grid";
-import { BaseStatus } from "..";
 import { computed, ref, watch } from "vue";
 import { mergeObjects } from "../../../utils";
 import { Icon } from "@iconify/vue";
@@ -75,6 +74,9 @@ const defaultConfig: DxDataGrid = {
     width: "100%",
     height: "100%",
     hoverStateEnabled: true,
+    paging:{
+        enabled: false
+    },
     selection: {
         mode: "multiple",
         allowSelectAll: true,

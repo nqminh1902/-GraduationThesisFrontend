@@ -13,3 +13,6 @@ export * from './RecruitmentPeriods'
 export * from './RecruitmentRound'
 export * from './Recruitment'
 export * from './RecruitmentDetailModel'
+export * from "./RecruimentBroadModel"
+export * from "./CandidateSchedule"
+export * from "./CandidateScheduleDetail"

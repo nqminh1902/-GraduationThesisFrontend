@@ -1,9 +1,9 @@
 <template>
     <div class="container-app">
         <the-header></the-header>
-        <div class="flex w-full">
+        <div class="flex w-full" style="height: calc(100% - 48px) ;">
             <the-sidebar></the-sidebar>
-            <div class="" style="width: calc(100% - 220px);">
+            <div class="" style="width: calc(100% - 220px); height: 100%;">
                 <router-view></router-view>
             </div>
         </div>

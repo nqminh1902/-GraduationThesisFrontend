@@ -19,7 +19,7 @@ const router = createRouter({
             path: '/',
             name: 'recruitment-news',
             meta: {
-                Title: t('app.title.admin'),
+                Title: 'Tin tuyển dụng',
             },
             component: () => import('../views/recruitment-news/RecruitmentNews.vue'),
         },
@@ -27,7 +27,7 @@ const router = createRouter({
             path: '/detail/:id',
             name: 'recruitment-news-detail',
             meta: {
-                Title: t('app.title.admin'),
+                Title: 'Chi tiết tin',
             },
             component: () => import('../views/recruitment-news/recruitment-news-detail/RecruitmentNewsDetail.vue'),
         },
@@ -35,7 +35,7 @@ const router = createRouter({
             path: '/candidate',
             name: 'candidate',
             meta: {
-                Title: t('app.title.admin'),
+                Title: 'Ứng viên',
             },
             component: () => import('../views/candidate/Candidate.vue'),
         },
@@ -51,7 +51,7 @@ const router = createRouter({
             path: '/recruitment-news/:id',
             name: 'setting-recruitment',
             meta: {
-                Title: t('app.title.admin'),
+                Title: 'Tin tuyển dụng',
             },
             redirect: { name: 'setting-recruitment-infor' },
             children: [
@@ -59,7 +59,7 @@ const router = createRouter({
                     path: '/recruitment-news/:id/infor',
                     name: 'setting-recruitment-infor',
                     meta: {
-                        Title: t('app.title.admin'),
+                        Title: 'Tin tuyển dụng',
                     },
                     component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitmentInfor.vue'),
                 },
@@ -67,7 +67,7 @@ const router = createRouter({
                     path: '/recruitment-news/:id/plan',
                     name: 'setting-recruitment-plan',
                     meta: {
-                        Title: t('app.title.admin'),
+                        Title: 'Tin tuyển dụng',
                     },
                     component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitmentPlan.vue'),
                 },
@@ -75,7 +75,7 @@ const router = createRouter({
                     path: '/recruitment-news/:id/process',
                     name: 'setting-recruitment-process',
                     meta: {
-                        Title: t('app.title.admin'),
+                        Title: 'Tin tuyển dụng',
                     },
                     component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitmentProcess.vue'),
                 },
@@ -83,12 +83,63 @@ const router = createRouter({
                     path: '/recruitment-news/:id/council',
                     name: 'setting-recruitment-council',
                     meta: {
-                        Title: t('app.title.admin'),
+                        Title: 'Tin tuyển dụng',
                     },
                     component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitmentCouncil.vue'),
                 },
             ],
             component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitment.vue'),
+        },
+        {
+            path: '/setting',
+            name: 'setting',
+            meta: {
+                Title: 'Thiết lập',
+            },
+            redirect: { name: 'setting-position' },
+            children: [
+                {
+                    path: '/setting/job-position',
+                    name: 'setting-position',
+                    meta: {
+                        Title: 'Thiết lập',
+                    },
+                    component: () => import('../views/setting/tabs/JobPosition.vue'),
+                },
+                {
+                    path: '/setting/university',
+                    name: 'setting-university',
+                    meta: {
+                        Title: 'Thiết lập',
+                    },
+                    component: () => import('../views/setting/tabs/University.vue'),
+                },
+                {
+                    path: 'setting/education-major',
+                    name: 'setting-education-major',
+                    meta: {
+                        Title: 'Thiết lập',
+                    },
+                    component: () => import('../views/setting/tabs/EducationMajor.vue'),
+                },
+                {
+                    path: 'setting/reason-eliminate',
+                    name: 'setting-reason-eliminate',
+                    meta: {
+                        Title: 'Thiết lập',
+                    },
+                    component: () => import('../views/setting/tabs/ReasonEliminate.vue'),
+                },
+                {
+                    path: 'setting/work-location',
+                    name: 'setting-work-location',
+                    meta: {
+                        Title: 'Thiết lập',
+                    },
+                    component: () => import('../views/setting/tabs/WorkLocation.vue'),
+                },
+            ],
+            component: () => import('../views/setting/RecruitmentSetting.vue')
         },
         {
             path: '/admin',

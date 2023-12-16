@@ -13,31 +13,31 @@
         </div>
         <div class="setting-content">
             <div class="setting-sidebar">
-                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-infor', params: {id: route.params.id} }">
+                <div class="setting-sidebar-item" :class="routeActive == 'infor' && 'active'" @click="ChangeRouter('infor')">
                     <Icon icon="material-symbols:edit-outline"  
                     width="20"
                     height="20"
                     :color="'#7a8188'"
                     class="cursor-pointer mr-[8px]"/>
                     <div  class="">Thông tin tuyển dụng</div>
-                </router-link>
-                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-plan', params: {id: route.params.id}  }">
+                </div>
+                <div class="setting-sidebar-item" :class="routeActive == 'plan' && 'active'" @click="ChangeRouter('plan')">
                     <Icon icon="mdi:floor-plan"  
                     width="20"
                     height="20"
                     :color="'#7a8188'"
                     class="cursor-pointer mr-[8px]"/>
                     <div class="">Kế hoạch thực hiện</div>
-                </router-link>
-                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-process', params: {id: route.params.id}  }">
+                </div>
+                <div class="setting-sidebar-item" :class="routeActive == 'process' && 'active'" @click="ChangeRouter('process')">
                     <Icon icon="carbon:ibm-process-mining"  
                     width="20"
                     height="20"
                     :color="'#7a8188'"
                     class="cursor-pointer mr-[8px]"/>
                     <div  class="">Quy trình tuyển dụng</div>
-                </router-link>
-                <router-link class="setting-sidebar-item" :to="{ name: 'setting-recruitment-council', params: {id: route.params.id}  }">
+                </div>
+                <div class="setting-sidebar-item" :class="routeActive == 'council' && 'active'" @click="ChangeRouter('council')">
                     <Icon icon="pepicons-pop:people"  
                     width="20"
                     height="20"
@@ -45,7 +45,7 @@
                     class="cursor-pointer mr-[8px]"
                     />
                     <div class="">Hội đồng tuyển dụng</div>
-                </router-link>
+                </div>
             </div>
             <div class="flex-1 h-full overflow-hidden">
                 <router-view></router-view>
@@ -88,6 +88,7 @@ const recruitmentApi = new RecruitmentApi()
 const toastStore = useToastStore();
 const route = useRoute()
 const router = useRouter()
+const routeActive = ref("infor")
 let isEdit = ref(false)
 
 if(route.params.id != "0"){
@@ -112,6 +113,10 @@ const buttonSaveConfig = ref<DxButton>({
     text: "Lưu và đăng tin",
     stylingMode: ButtonStylingMode.contained,
     async onClick(e) {
+        if(!recruitment.value.RecruitmentBroads.length){
+            toastStore.toggleToast(true, "Vui lòng chọn hội đồng tuyển dụng", ToastType.warning)
+            return
+        }
         if(!isEdit.value){
             recruitment.value.RecruitmentRounds.forEach((round, index) => {
                 round.SordOrder = index + 1
@@ -146,8 +151,86 @@ const buttonDraftConfig = ref<DxButton>({
     },
 });
 
+function ChangeRouter(name: string){
+    if(!validate()){
+        toastStore.toggleToast(true, "Vui lòng nhập đầy đủ thông tin bắt buộc", ToastType.warning)
+        return
+    }
+    routeActive.value = name
+    switch (name) {
+        case "infor":
+            router.push({ name: 'setting-recruitment-infor', params: {id: route.params.id} })
+            break;
+        case "plan":
+            router.push({ name: 'setting-recruitment-plan', params: {id: route.params.id}  })
+            break;
+        case "process":
+            router.push({ name: 'setting-recruitment-process', params: {id: route.params.id}  })
+            break;
+        case "council":
+            router.push({ name: 'setting-recruitment-council', params: {id: route.params.id}  })
+            break;
+        default:
+            router.push({ name: 'setting-recruitment-infor', params: {id: route.params.id} })
+            break;
+    }
+}
+
+function validate(){
+    let result = true
+    if(!recruitment.value.Title){
+        result = false
+    }
+    if(!recruitment.value.JobPositionID){
+        result = false
+    }
+    if(!recruitment.value.CarrerID){
+        result = false
+    }
+    if(!recruitment.value.WorkLocationID){
+        result = false
+    }
+    if(!recruitment.value.RegistrationExpiryDate){
+        result = false
+    }
+    if(!recruitment.value.MinSalary){
+        result = false
+    }
+    if(!recruitment.value.MaxSalary){
+        result = false
+    }
+    if(!recruitment.value.CurrencyCodeID){
+        result = false
+    }
+    if(!recruitment.value.Summary){
+        result = false
+    }
+    if(!recruitment.value.Description){
+        result = false
+    }
+    if(!recruitment.value.Requirement){
+        result = false
+    }
+    if(!recruitment.value.Benefit){
+        result = false
+    }
+    if(!recruitment.value.ContactName){
+        result = false
+    }
+    if(!recruitment.value.ContactMobile){
+        result = false
+    }
+    if(!recruitment.value.ContactEmail){
+        result = false
+    }
+    if(!recruitment.value.ContactMobile){
+        result = false
+    }
+    return result
+}
+
 function backPage(){
-    router.go(-1)
+    router.push({name: "recruitment-news"})
 }
 
 </script>
@@ -195,13 +278,7 @@ function backPage(){
             white-space: nowrap;
             text-align: center;
             background-color: #ffffff;
-            &.router-link-active {
-                color: #2680eb;
-                border-radius: 4px;
-                font-weight: 700;
-                border-bottom: none;
-                background-color: rgba(225, 238, 255, 0.8);
-        }
+            
         }
     }
     .setting-btn{
@@ -217,5 +294,12 @@ function backPage(){
             border-radius: 6px;
         }
     }
+}
+.active {
+    color: #2680eb !important;
+    border-radius: 4px;
+    font-weight: 700;
+    border-bottom: none;
+    background-color: rgba(225, 238, 255, 0.8) !important;
 }
 </style>

@@ -101,41 +101,62 @@ export const recruitmentRounds = [
         RecruitmentRoundName: "Ứng tuyển",
         IsSystem: true,
         SordOrder: 1,
-        RecruitmentID: 0
+        RecruitmentID: 0,
+        IsHired: false
     },
     {
         RecruitmentRoundID: 2,
         RecruitmentRoundName: "Sơ loại hồ sơ",
         IsSystem: true,
         SordOrder: 2,
-        RecruitmentID: 0
+        RecruitmentID: 0,
+        IsHired: false
     },
     {
         RecruitmentRoundID: 3,
         RecruitmentRoundName: "Thi tuyển",
         IsSystem: true,
         RecruitmentID: 0,
-        SordOrder: 3
+        SordOrder: 3,
+        IsHired: false
     },
     {
         RecruitmentRoundID: 4,
         RecruitmentRoundName: "Phỏng vấn",
         IsSystem: true,
         RecruitmentID: 0,
-        SordOrder: 4
+        SordOrder: 4,
+        IsHired: false
     },
     {
         RecruitmentRoundID: 5,
         RecruitmentRoundName: "Học việc",
         IsSystem: true,
         RecruitmentID: 0,
-        SordOrder: 5
+        SordOrder: 5,
+        IsHired: false
     },
     {
         RecruitmentRoundID: 0,
         IsSystem: true,
         RecruitmentID: 0,
         RecruitmentRoundName: "Đã tuyển",
-        SordOrder: 6
+        SordOrder: 6,
+        IsHired: true
     }
 ] as RecruitmentRoundModel[]
+
+export const schedule = [
+    {
+        ScheduleType: 1,
+        ScheduleName: "Phỏng vấn trực tiếp"
+    },
+    {
+        ScheduleType: 2,
+        ScheduleName: "Phỏng vấn trực tuyến ngoài ứng dụng"
+    },
+    {
+        ScheduleType: 3,
+        ScheduleName: "Tiếp nhận thử việc"
+    },
+]

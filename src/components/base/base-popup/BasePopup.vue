@@ -51,17 +51,20 @@ import { defaultBasePopupConfig } from "@/constants/components/base";
 import { Icon } from "@iconify/vue";
 import { ButtonStylingMode, ButtonType } from "@/enums";
 import { useI18n } from "vue3-i18n";
-import { ref } from "vue";
+import { ref, watch } from "vue";
+
 
 // #region common
 const { t } = useI18n();
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     config: DxPopup;
     showBtnFooter?: boolean;
     popupVisible: boolean;
     title?: string;
-}>();
+}>(), {
+    showBtnFooter: true,
+});
 
 const popupConfig: DxPopup = mergeObjects(defaultBasePopupConfig, props.config);
 
@@ -97,6 +100,7 @@ function handleClosePopup() {
 
 <style lang="scss">
 .base-popup {
+    font-family: 'Roboto', sans-serif !important;
     display: flex;
     flex-direction: column;
     .base-header {

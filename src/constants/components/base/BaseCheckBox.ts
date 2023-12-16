@@ -1,7 +1,7 @@
 import type { DxCheckBox } from 'devextreme-vue/check-box';
 
 export const defaultBaseCheckBoxConfig: DxCheckBox = {
-    text: 'Checkbox',
+    text: '',
     iconSize: 18,
     disabled: false,
     readOnly: false,

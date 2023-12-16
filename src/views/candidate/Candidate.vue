@@ -2,18 +2,38 @@
     <div id="candidate">
         <div class="container-candidate">
             <div class="content-title">
-                <Icon
-                    :icon="'mdi:users'"
-                    :color="'#2563eb'"
-                    width="24"
-                    height="24"
-                    class="mx-6"
-                />
-                <div class="text-title">Ứng viên</div>
+                <div class="flex items-center">
+                    <Icon
+                        :icon="'mdi:users'"
+                        :color="'#2563eb'"
+                        width="24"
+                        height="24"
+                        class="mr-6"
+                    />
+                    <div class="text-title">Ứng viên</div>
+                </div>
+                <div class="flex">
+                    <button class="candidate-btn" @click="handleAddCandidate">
+                        <Icon
+                            :icon="'tabler:plus'"
+                            :color="'#ffffff'"
+                            width="20"
+                            height="20"
+                        />
+                        <div class="text-white ml-[4px]">Thêm ứng viên</div>
+                    </button>
+                    <button class="option-btn" id="option">
+                        <Icon
+                            :icon="'ep:arrow-down-bold'"
+                            :color="'#ffffff'"
+                            width="20"
+                            height="20"
+                        />
+                    </button>
+                </div>
             </div>
             <div class="toolbar">
                 <base-text-box :config="searchDefaultConfig" />
-                <base-button :config="buttonConfig" />
             </div>
             <div class="grid">
                 <base-table
@@ -44,7 +64,28 @@
             />
         </div>
         <popup-candidate v-if="isShowPopup" :isShowPopup="isShowPopup" :candidateID="candidateID" :is-edit="isUpdate" @onClose="isShowPopup = false"  @on-save="handleSaveSucces"></popup-candidate>
+        <popup-import-candidate v-if="isShowPopupImport" :isShowPopup="isShowPopupImport"  @onClose="isShowPopupImport = false" @on-save="handleSaveSucces"></popup-import-candidate>
     </div>
+    <DxPopover 
+        :target="'#option'"
+        show-event="click"
+        :visible="false"
+        :hideOnOutsideClick="true"
+        position="bottom"
+        width="auto"
+        height="auto"
+        >
+            <div class="flex items-center h-[35px] cursor-pointer icon-export" @click="isShowPopupImport = true">
+                <Icon
+                    :icon="'mdi:import'"
+                    :color="'#7A8188'"
+                    width="24"
+                    height="24"
+                    class="mx-[4px]"
+                />
+                <div class="">Nhập khẩu</div>
+            </div>
+    </DxPopover>
 </template>
 <script lang="ts" setup>
 import { useI18n } from "vue3-i18n";
@@ -76,7 +117,9 @@ import { useToastStore } from "../../stores";
 import type { Column } from "devextreme/ui/data_grid";
 import CandidateApi from "../../apis/candidate/candidate-api"
 import PopupCandidate from "./popup/PopupCandidate.vue"
+import PopupImportCandidate from "./popup/PopupImportCandidate.vue";
 import { formatDate } from "../../utils";
+import { DxPopover } from 'devextreme-vue/popover';
 
 const toastStore = useToastStore();
 const { t, getLocale, setLocale } = useI18n();
@@ -87,7 +130,7 @@ const baseTableRef = ref<InstanceType<typeof DxDataGrid>>(null)
 const isShowPopup =  ref(false);
 const isUpdate = ref<boolean>(false);
 const collection = ref(new CollectionModel());
-const showPopupDelete = ref<boolean>(false);
+const isShowPopupImport = ref<boolean>(false);
 const candidateID = ref(undefined)
 const popupTitle = ref("Thêm bộ sưu tập");
 
@@ -227,20 +270,14 @@ const searchDefaultConfig: DxTextBox = {
     },
 };
 
-const buttonConfig = ref<DxButton>({
-    type: ButtonType.default,
-    height: 32,
-    text: "Thêm bộ sưu tập",
-    stylingMode: ButtonStylingMode.contained,
-    icon: "plus",
-    onClick(e) {
-        collection.value = new CollectionModel();
+
+function handleAddCandidate(){
+    collection.value = new CollectionModel();
         popupTitle.value = "Thêm bộ sưu tập";
         isShowPopup.value = true;
         isUpdate.value = false;
         candidateID.value = undefined
-    },
-});
+}
 
 function pagingChange(e: BaseNavigationType) {
     filterPaging.PageIndex = e.pageIndex;
@@ -290,6 +327,33 @@ async function handleDelete(event: any) {
 </script>
 
 <style lang="scss" scoped>
+.icon-export{
+    width: 140px;
+    &:hover{
+        background-color: #E7F1FF;
+    }
+}
+.candidate-btn{
+    width: auto;
+    font-weight: 500;
+    font-size: 14px!important;
+    height: 36px!important;
+    padding: 8px 12px!important;
+    border-radius: 4px 0 0 4px;
+    display: flex;
+    align-items: center;
+    background-color: #2680eb!important;
+    border-right: 1px solid #ffffff;
+}
+.option-btn{
+    width: auto;
+    font-weight: 500;
+    font-size: 14px!important;
+    height: 36px!important;
+    padding: 8px 12px!important;
+    border-radius: 0px 4px 4px 0px;
+    background-color: #2680eb!important;
+}
 .container-candidate{
     width: 100%;
     height: calc(100vh - 48px);
@@ -303,6 +367,8 @@ async function handleDelete(event: any) {
         height: 48px;
         align-items: center;
         line-height: 1.25;
+        justify-content: space-between;
+        padding: 0 16px;
     }
     .toolbar {
         height: 48px;

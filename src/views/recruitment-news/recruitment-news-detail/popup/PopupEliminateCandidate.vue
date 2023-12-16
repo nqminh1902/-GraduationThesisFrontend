@@ -13,19 +13,23 @@
             <div class="p-[8px]">
                 <div class="mb-[8px]" for="">Lý do <span style="color: red;">*</span></div>
                 <base-select-box :config="selectBoxConfig" v-model="selectedValue"/>
+                <div class="mt-[12px]">
+                    <base-check-box :config="candidateConfig" v-model="isSendEmail"/>
+                </div>
             </div>
         </template>
     </base-popup>
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
-import { DxPopup, DxSelectBox } from "devextreme-vue";
+import { DxCheckBox, DxPopup, DxSelectBox } from "devextreme-vue";
 import { useToastStore } from "../../../../stores";
 import { ToastType } from "../../../../enums";
 import RecruitmentDetailApi from "../../../../apis/recruitment-detail-api/recruitment-detail-api"
 import {
     BasePopup,
     BaseRadioGroup,
+    BaseCheckBox,
     BaseSelectBox
 } from "../../../../components/base/index";
 import CustomStore from "devextreme/data/custom_store";
@@ -68,6 +72,12 @@ const selectBoxConfig = ref<DxSelectBox>({
     ]
 })
 
+const candidateConfig = ref<DxCheckBox>({
+    text: "Gửi email cho ứng viên"
+})
+
+const isSendEmail = ref(false)
+
 const popupConfig = ref<DxPopup>({
     height: "auto",
     width: "auto",
@@ -83,13 +93,17 @@ function handleClose(){
 }
 
 async function handleSave(){
-        let res = await recruitmentDetailApi.changeEliminateCandidate(props.ids, selectedValue.value, props.recruitmentID)
-        if(res && res.data.Success){
-            toastStore.toggleToast(true, "Loại ứng viên thành công", ToastType.success);
-        }else{
-            toastStore.toggleToast(true, "Loại ứng viên thất bại", ToastType.error);
-        }
-        emit("onSave")
+    if(!selectedValue.value){
+        toastStore.toggleToast(true, "Vui lòng chọn lý do loại ứng viên", ToastType.warning);
+        return
+    }
+    let res = await recruitmentDetailApi.changeEliminateCandidate(props.ids, selectedValue.value, props.recruitmentID, isSendEmail.value)
+    if(res && res.data.Success){
+        toastStore.toggleToast(true, "Loại ứng viên thành công", ToastType.success);
+    }else{
+        toastStore.toggleToast(true, "Loại ứng viên thất bại", ToastType.error);
+    }
+    emit("onSave")
     
 }
 

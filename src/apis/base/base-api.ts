@@ -32,7 +32,7 @@ export default class BaseApi<T> {
     }
 
     insertBulk(param: T[]): Promise<AxiosResponse<ServiceResponse>> {
-        return this.baseApi.post(this.controller + `/bulk`, param);
+        return this.baseApi.post(this.controller + `/insertBulk`, param);
     }
 
     update(id: number, param: T): Promise<AxiosResponse<ServiceResponse>> {

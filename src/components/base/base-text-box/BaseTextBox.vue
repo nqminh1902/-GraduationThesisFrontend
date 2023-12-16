@@ -72,16 +72,16 @@ defineExpose({
 .base-text-box {
     .dx-texteditor.dx-state-hover,
     .dx-textbox.dx-state-hover {
-        border-color: var(--app-color-primary) !important;
+        border-color: #2680EB !important;
         .dx-texteditor-label {
-            color: var(--app-color-primary) !important;
+            color: #2680EB !important;
         }
     }
     .dx-texteditor.dx-state-focused,
     .dx-textbox.dx-state-focused {
-        border-color: var(--app-color-primary) !important;
+        border-color: #2680EB !important;
         .dx-texteditor-label {
-            color: var(--app-color-primary) !important;
+            color: #2680EB !important;
         }
     }
     .textbox-border-radius {

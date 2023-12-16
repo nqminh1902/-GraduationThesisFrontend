@@ -18,7 +18,4 @@ export const defaultBaseDateBoxConfig: DxDateBox = {
     useMaskBehavior: true,
     hoverStateEnabled: true,
     height: 32,
-    elementAttr: {
-        class: 'base-date-box',
-    },
 };

@@ -1,9 +1,11 @@
 <template>
-    <dx-number-box
-        ref="numberBoxRef"
-        v-bind="numberBoxConfig"
-        v-model="internalValue"
-    />
+    <div class="base-number-box">
+        <dx-number-box
+            ref="numberBoxRef"
+            v-bind="numberBoxConfig"
+            v-model="internalValue"
+        />
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -51,9 +53,9 @@ defineExpose({
 
 <style lang="scss">
 .dx-numberbox.dx-state-hover {
-    border-color: var(--app-color-primary) !important;
+    border-color: #2680EB !important;
 }
 .dx-numberbox.dx-state-focused {
-    border-color: var(--app-color-primary) !important;
+    border-color: #2680EB !important;
 }
 </style>

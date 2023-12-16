@@ -1,13 +1,15 @@
 <template>
-    <dx-select-box
-        ref="dxSelectBoxRef"
-        v-model:value="internalValue"
-        v-bind="selectboxConfig"
-    >
-        <template #iconTemplate>
-            <Icon icon="fa6-solid:chevron-down" />
-        </template>
-    </dx-select-box>
+    <div class="base-select-box">
+        <dx-select-box
+            ref="dxSelectBoxRef"
+            v-model:value="internalValue"
+            v-bind="selectboxConfig"
+        >
+            <template #iconTemplate>
+                <Icon icon="fa6-solid:chevron-down" />
+            </template>
+        </dx-select-box>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -58,7 +60,7 @@ defineExpose({
     &.dx-texteditor.dx-state-hover,
     &.dx-texteditor.dx-state-focused,
     &.dx-texteditor.dx-state-active {
-        border-color: var(--app-color-primary);
+        border-color: #2680EB;
     }
     &.dx-dropdowneditor.dx-state-active .dx-dropdowneditor-icon,
     &.dx-dropdowneditor.dx-state-focused .dx-dropdowneditor-icon,
@@ -89,7 +91,7 @@ defineExpose({
     &.dx-state-focused,
     &.dx-list-item-selected {
         color: var(--app-color-white);
-        background-color: var(--app-color-primary);
+        background-color: #2680EB;
     }
 }
 .dx-list:not(.dx-list-select-decorator-enabled) .dx-list-item {
@@ -97,7 +99,7 @@ defineExpose({
     &.dx-list-item-selected.dx-state-focused,
     &.dx-list-item-selected.dx-state-active {
         color: var(--app-color-white) !important;
-        background-color: var(--app-color-primary) !important;
+        background-color: #2680EB !important;
     }
 }
 </style>

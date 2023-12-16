@@ -1,3 +1,4 @@
+import type { Gender } from "@/enums";
 import { BaseModel } from "./BaseModel";
 
 export class RecruitmentDetailModel extends BaseModel {
@@ -26,6 +27,7 @@ export class RecruitmentDetailModel extends BaseModel {
     RecruitmentName?: string
     IsEmployee?: number
     Avatar?: string
+    Gender?: Gender
 }
 
 export enum RecruitmentDetailStatusEnum {

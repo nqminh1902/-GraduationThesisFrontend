@@ -10,3 +10,4 @@ export * from './orders';
 export * from './sidebar-item';
 export * from './recruitment'
 export * from "./candidate"
+export * from "./fake-council"

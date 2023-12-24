@@ -116,20 +116,20 @@
                 <div class="w-full h-[56px] flex items-center" v-else>
                     <dx-scroll-view width="100%" direction="horizontal">
                     <div class="flex items-center w-full h-[32px]">
-                            <div class="d-flex items-center ml-[16px]">
-                                <span class="mr-[4px]">Đã chọn: </span>
-                                <b>{{ selectedRowKey.length }}</b>
-                            </div>
-                            <base-button :config="changeRoundConfig" class=" ml-[12px]"/>
-                            <base-button :config="EliminateConfig" class=" ml-[12px]"/>
-                            <base-button :config="ScheduleConfig" class=" ml-[12px]"/>
-                            <base-button :config="ChangeRecruitmentConfig" class=" ml-[12px]"/>
-                            <base-button :config="EmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
-                            <base-button :config="RecruitmentContinueConfig" class=" ml-[12px]" v-if="currentStatus == 2"/>
-                            <base-button :config="RevokeEmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
-                            <base-button :config="DeleteMultipleConfig" class=" ml-[12px]"/>
-                            <base-button :config="RemoveFromRecruitConfig" class=" ml-[12px]"/>
+                        <div class="d-flex items-center ml-[16px]">
+                            <span class="mr-[4px]">Đã chọn: </span>
+                            <b>{{ selectedRowKey.length }}</b>
                         </div>
+                        <base-button :config="changeRoundConfig" class=" ml-[12px]"/>
+                        <base-button :config="EliminateConfig" class=" ml-[12px]"/>
+                        <base-button :config="ScheduleConfig" class=" ml-[12px]"/>
+                        <base-button :config="ChangeRecruitmentConfig" class=" ml-[12px]"/>
+                        <base-button :config="EmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
+                        <base-button :config="RecruitmentContinueConfig" class=" ml-[12px]" v-if="currentStatus == 2"/>
+                        <base-button :config="RevokeEmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
+                        <base-button :config="DeleteMultipleConfig" class=" ml-[12px]"/>
+                        <base-button :config="RemoveFromRecruitConfig" class=" ml-[12px]"/>
+                    </div>
                     </dx-scroll-view>
                 </div>
                 <div class="w-full" style="height:  calc(100% - 56px - 56px - 46px);">
@@ -137,6 +137,7 @@
                     :config="tableConfig"
                     ref="baseTableRef"
                     @on-delete="handleDelete"
+                    @on-edit="handleEdit"
                     >
                         <template #date="data">
                             <div class="">{{ formatDate(data.data.data.ApplyDate) }}</div>
@@ -459,6 +460,7 @@ const searchDefaultConfig: DxTextBox = {
     ],
     onValueChanged: (e) => {
        filterPaging.SearchValue = e.value
+       filterPaging.PageIndex = 1
        getCandidates()
     }
 }
@@ -601,12 +603,14 @@ const tableConfig = ref<DxDataGrid>({
         selectedRowData.value = e.selectedRowsData
         selectedRowKey.value = e.selectedRowKeys 
     },
-    onRowDblClick(e) {
-        candidateID.value = e.data.CandidateID
-        isUpdate.value = true
-        isShowPopup.value = true
-    },
 });
+
+function handleEdit(e: any){
+    candidateID.value = e.CandidateID
+    isUpdate.value = true
+    isShowPopup.value = true
+    
+}
 
 function handleAddCandidate(){
     isShowPopup.value = true;

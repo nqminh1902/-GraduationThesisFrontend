@@ -15,17 +15,9 @@
                         />
                         <div class="text-white ml-[4px]">Thêm chuyên ngành</div>
                     </button>
-                    <button class="option-btn" id="option">
-                        <Icon
-                            :icon="'ep:arrow-down-bold'"
-                            :color="'#ffffff'"
-                            width="20"
-                            height="20"
-                        />
-                    </button>
                 </div>
             </div>
-            <div class="flex-1">
+            <div class="flex-1" style="height: calc(100% - 52px);">
                 <div class="h-[48px]">
                     <base-text-box :config="searchDefaultConfig" />
                 </div>
@@ -47,26 +39,6 @@
             </div>
         </div>
     </div>
-    <DxPopover 
-        :target="'#option'"
-        show-event="click"
-        :visible="false"
-        :hideOnOutsideClick="true"
-        position="bottom"
-        width="auto"
-        height="auto"
-        >
-            <div class="flex items-center h-[35px] cursor-pointer icon-export" @click="isShowPopupImport = true">
-                <Icon
-                    :icon="'mdi:import'"
-                    :color="'#7A8188'"
-                    width="24"
-                    height="24"
-                    class="mx-[4px]"
-                />
-                <div class="">Nhập khẩu</div>
-            </div>
-    </DxPopover>
     <base-popup
         v-if="isShowPopup"
         :config="popupConfig"
@@ -88,6 +60,7 @@
                     <base-text-box
                         :config="textBoxConfig"
                         class="mb-6"
+                        v-model="educationMajor.EducationMajorName"
                     />
                 </div>
             </div>
@@ -132,9 +105,14 @@ import {
 } from "../../../components/base/index";
 import { DxPopover } from 'devextreme-vue/popover';
 import { ref } from "vue";
-import { Column } from "devextreme/ui/data_grid";
+import type { Column } from "devextreme/ui/data_grid";
 import { PagingRequest } from "../../../models";
-import { BaseNavigationType } from "../../../types";
+import type { BaseNavigationType } from "../../../types";
+import { useToastStore } from "../../../stores";
+import { EducationMajorModel } from "../../../models";
+import EducationMajorApi from "../../../apis/education-major/education-major-api"
+import { ToastType } from "../../../enums";
+import CustomStore from "devextreme/data/custom_store";
 
 
 const isShowPopupImport = ref(false)
@@ -143,7 +121,11 @@ const filterPaging = new PagingRequest();
 const baseTableRef = ref<InstanceType<typeof DxDataGrid>>(null)
 const showPopupDelete = ref(false)
 const isShowPopup = ref(false)
-const popupTitle = ref("Thêm chuyển ngành");
+const popupTitle = ref("Thêm chuyên ngành");
+const toastStore = useToastStore();
+const isEdit = ref(false)
+const educationMajor = ref<EducationMajorModel>(new EducationMajorModel())
+const educationMajorApi = new EducationMajorApi()
 
 const popupConfig = ref<DxPopup>({
     height: "auto",
@@ -151,12 +133,24 @@ const popupConfig = ref<DxPopup>({
 });
 
 const textBoxConfig: DxTextBox = {
-    placeholder: "Tên trường đại học",
+    placeholder: "Tên chuyên ngành",
     onValueChanged: (e) => {
         
     },
 };
 
+const dataSource = new CustomStore({
+    key: "EducationMajorID",
+    async load(loadOptions) {
+        filterPaging.Collums = ["EducationMajorName"];
+        const res = await educationMajorApi.getFilterPaging(filterPaging);
+        if (res) {
+            totalCount.value = res.data.Data.TotalCount;
+        }
+        return res.data.Data.Data || [];
+    },
+    loadMode: "processed",
+});
 
 const tableConfig = ref<DxDataGrid>({
     width: '100%',
@@ -166,10 +160,9 @@ const tableConfig = ref<DxDataGrid>({
             caption: "Tên chuyên ngành",
             dataField: "EducationMajorName",
             dataType: "string",
-            cellTemplate: "name-template",
         },
     ] as (string | Column<any, any>)[],
-    dataSource: [],
+    dataSource: dataSource,
     keyExpr: "EducationMajorID",
     onSelectionChanged(e) {
     },
@@ -189,11 +182,14 @@ const searchDefaultConfig: DxTextBox = {
     ],
     onValueChanged: (e) => {
        filterPaging.SearchValue = e.value
+       filterPaging.PageIndex = 1
+       baseTableRef.value?.getInstance()?.refresh();
     }
 }
 
 async function handleDelete(event: any) { 
-
+    educationMajor.value = event
+    showPopupDelete.value = true
 }
 
 function pagingChange(e: BaseNavigationType) {
@@ -203,16 +199,73 @@ function pagingChange(e: BaseNavigationType) {
 }
 
 function handleAdd(){
+    educationMajor.value = new EducationMajorModel()
+    isEdit.value = false;
     isShowPopup.value = true
 }
 
 async function handleEdit(event: any) {
-    isShowPopup.value = true
+    try {
+        const res: any = await educationMajorApi.getByID(event.EducationMajorID);
+        if (res?.data.Success) {
+            educationMajor.value = res?.data.Data;
+            popupTitle.value = "Sửa tên chuyên ngành";
+            isEdit.value = true;
+            isShowPopup.value = true;
+        } else {
+            toastStore.toggleToast(
+                true,
+                "Lấy thông tin chuyên ngành viên thất bại",
+                ToastType.error
+            );
+        }
+    } catch (error) {
+        toastStore.toggleToast(
+            true,
+            "Lấy thông tin chuyên ngành viên thất bại",
+            ToastType.error
+        );
+    }
 }
 
 async function handleRemove() {
+    const res = await educationMajorApi.delete(educationMajor.value.EducationMajorID)
+    if(res.data.Success){
+        toastStore.toggleToast(true, "Xóa vị trí công việc thành công", ToastType.success)
+        baseTableRef.value?.getInstance()?.refresh();
+        showPopupDelete.value = false
+    }else{
+        toastStore.toggleToast(true, "Xóa vị trí công việc thất bại", ToastType.error)
+    }
 }
+
 async function handleSave() {
+    if(isEdit.value){
+        const res = await educationMajorApi.update(educationMajor.value.EducationMajorID, educationMajor.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Cập nhật vị trí công việc thành công", ToastType.success)
+            baseTableRef.value?.getInstance()?.refresh();
+            isShowPopup.value = false
+        }else{
+            toastStore.toggleToast(true, "Cập nhật vị trí công việc thất bại", ToastType.error)
+        }
+    }else{
+        const res = await educationMajorApi.insert(educationMajor.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Thêm mới vị trí công việc thành công", ToastType.success)
+            baseTableRef.value?.getInstance()?.refresh();
+            isShowPopup.value = false
+        }else{
+            toastStore.toggleToast(true, "Thêm mới vị trí công việc thất bại", ToastType.error)
+        }
+    }
+}
+
+function SaveImport(){
+    isShowPopupImport.value = false
+    filterPaging.PageIndex = 1;
+    filterPaging.SearchValue = ""
+    baseTableRef.value?.getInstance()?.refresh();
 }
 </script>
 <style lang="scss" scoped>
@@ -248,7 +301,7 @@ async function handleSave() {
     font-size: 14px!important;
     height: 36px!important;
     padding: 8px 12px!important;
-    border-radius: 4px 0 0 4px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     background-color: #2680eb!important;

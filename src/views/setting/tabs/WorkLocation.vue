@@ -15,17 +15,9 @@
                         />
                         <div class="text-white ml-[4px]">Thêm địa điểm</div>
                     </button>
-                    <button class="option-btn" id="option">
-                        <Icon
-                            :icon="'ep:arrow-down-bold'"
-                            :color="'#ffffff'"
-                            width="20"
-                            height="20"
-                        />
-                    </button>
                 </div>
             </div>
-            <div class="flex-1">
+            <div class="flex-1" style="height: calc(100% - 52px);">
                 <div class="h-[48px]">
                     <base-text-box :config="searchDefaultConfig" />
                 </div>
@@ -49,26 +41,6 @@
             </div>
         </div>
     </div>
-    <DxPopover 
-        :target="'#option'"
-        show-event="click"
-        :visible="false"
-        :hideOnOutsideClick="true"
-        position="bottom"
-        width="auto"
-        height="auto"
-        >
-            <div class="flex items-center h-[35px] cursor-pointer icon-export" @click="isShowPopupImport = true">
-                <Icon
-                    :icon="'mdi:import'"
-                    :color="'#7A8188'"
-                    width="24"
-                    height="24"
-                    class="mx-[4px]"
-                />
-                <div class="">Nhập khẩu</div>
-            </div>
-    </DxPopover>
     <base-popup
         v-if="isShowPopup"
         :config="popupConfig"
@@ -84,11 +56,12 @@
             <div class="add-category-body">
                 <div class="field">
                     <div class="lable">
-                        Tên trường đại học<span style="color: red"> *</span>
+                        Tên địa điểm<span style="color: red"> *</span>
                     </div>
 
                     <base-text-box
                         :config="textBoxConfig"
+                        v-model="workLocation.WorkLocationName"
                         class="mb-6"
                     />
                 </div>
@@ -99,6 +72,7 @@
 
                     <base-select-box
                         :config="selectBoxConfig"
+                        v-model="workLocation.Status"
                     />
                 </div>
             </div>
@@ -144,18 +118,25 @@ import {
 } from "../../../components/base/index";
 import { DxPopover } from 'devextreme-vue/popover';
 import { ref } from "vue";
-import { Column } from "devextreme/ui/data_grid";
+import type { Column } from "devextreme/ui/data_grid";
 import { PagingRequest } from "../../../models";
-import { BaseNavigationType } from "../../../types";
+import type { BaseNavigationType } from "../../../types";
+import { WorkLocationModel } from "@/models/WorkLocationModel";
+import WorkLocationApi from "../../../apis/work-location/work-location-api"
+import { useToastStore } from "../../../stores";
+import { ToastType } from "@/enums";
+import CustomStore from "devextreme/data/custom_store";
 
-
-const isShowPopupImport = ref(false)
+const toastStore = useToastStore();
 const totalCount = ref(0)
 const filterPaging = new PagingRequest();
 const baseTableRef = ref<InstanceType<typeof DxDataGrid>>(null)
 const showPopupDelete = ref(false)
 const isShowPopup = ref(false)
 const popupTitle = ref("Thêm địa điểm");
+const workLocation = ref<WorkLocationModel>(new WorkLocationModel())
+const workLocationApi = new WorkLocationApi()
+const isEdit = ref(false)
 
 const popupConfig = ref<DxPopup>({
     height: "auto",
@@ -186,6 +167,19 @@ const selectBoxConfig = ref<DxSelectBox>({
     onValueChanged: (e) => {},
 });
 
+const dataSource = new CustomStore({
+    key: "WorkLocationID",
+    async load(loadOptions) {
+        filterPaging.Collums = ["WorkLocationName"];
+        const res = await workLocationApi.getFilterPaging(filterPaging);
+        if (res) {
+            totalCount.value = res.data.Data.TotalCount;
+        }
+        return res.data.Data.Data || [];
+    },
+    loadMode: "processed",
+});
+
 const tableConfig = ref<DxDataGrid>({
     width: '100%',
     columns: [
@@ -199,11 +193,12 @@ const tableConfig = ref<DxDataGrid>({
             alignment: "left",
             caption: "Trạng thái",
             dataField: "Status",
+            width: 150,
             dataType: "string",
-            template: "status-template"
+            cellTemplate: "status-template"
         },
     ] as (string | Column<any, any>)[],
-    dataSource: [],
+    dataSource: dataSource,
     keyExpr: "WorkLocationID",
     onSelectionChanged(e) {
     },
@@ -223,11 +218,14 @@ const searchDefaultConfig: DxTextBox = {
     ],
     onValueChanged: (e) => {
        filterPaging.SearchValue = e.value
+       filterPaging.PageIndex = 1
+       baseTableRef.value?.getInstance()?.refresh();
     }
 }
 
 async function handleDelete(event: any) { 
-
+    workLocation.value = event
+    showPopupDelete.value = true
 }
 
 function pagingChange(e: BaseNavigationType) {
@@ -237,16 +235,67 @@ function pagingChange(e: BaseNavigationType) {
 }
 
 function handleAdd(){
+    workLocation.value = new WorkLocationModel()
+    isEdit.value = false;
     isShowPopup.value = true
 }
 
 async function handleEdit(event: any) {
-    isShowPopup.value = true
+    try {
+        const res: any = await workLocationApi.getByID(event.WorkLocationID);
+        if (res?.data.Success) {
+            workLocation.value = res?.data.Data;
+            popupTitle.value = "Sửa địa điểm";
+            isEdit.value = true;
+            isShowPopup.value = true;
+        } else {
+            toastStore.toggleToast(
+                true,
+                "Lấy thông tin địa điểm thất bại",
+                ToastType.error
+            );
+        }
+    } catch (error) {
+        toastStore.toggleToast(
+            true,
+            "Lấy thông tin địa điểm thất bại",
+            ToastType.error
+        );
+    }
 }
 
 async function handleRemove() {
+    const res = await workLocationApi.delete(workLocation.value.WorkLocationID)
+    if(res.data.Success){
+        toastStore.toggleToast(true, "Xóa địa điểm thành công", ToastType.success)
+        baseTableRef.value?.getInstance()?.refresh();
+        showPopupDelete.value = false
+    }else{
+        toastStore.toggleToast(true, "Xóa địa điểm thất bại", ToastType.error)
+    }
 }
-async function handleSave() {}
+
+async function handleSave() {
+    if(isEdit.value){
+        const res = await workLocationApi.update(workLocation.value.WorkLocationID, workLocation.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Cập nhật địa điểm thành công", ToastType.success)
+            baseTableRef.value?.getInstance()?.refresh();
+            isShowPopup.value = false
+        }else{
+            toastStore.toggleToast(true, "Cập nhật địa điểm thất bại", ToastType.error)
+        }
+    }else{
+        const res = await workLocationApi.insert(workLocation.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Thêm mới địa điểm thành công", ToastType.success)
+            baseTableRef.value?.getInstance()?.refresh();
+            isShowPopup.value = false
+        }else{
+            toastStore.toggleToast(true, "Thêm mới địa điểm thất bại", ToastType.error)
+        }
+    }
+}
 </script>
 <style lang="scss" scoped>
     .recruitment-infor{
@@ -281,7 +330,7 @@ async function handleSave() {}
     font-size: 14px!important;
     height: 36px!important;
     padding: 8px 12px!important;
-    border-radius: 4px 0 0 4px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     background-color: #2680eb!important;
@@ -297,14 +346,16 @@ async function handleSave() {}
     background-color: #2680eb!important;
 }
 .publish{
-    border: solid 1px #48bb56!important;
     color: #48bb56!important;
-    height: 34px;
+    display: flex;
+    align-items: center;
+    height: 30px;
 }
 .stop{
-    border: solid 1px red!important;
     color: red!important;
-    height: 34px;
+    display: flex;
+    align-items: center;
+    height: 30px;
 }
 .add-category-header {
     width: 100%;

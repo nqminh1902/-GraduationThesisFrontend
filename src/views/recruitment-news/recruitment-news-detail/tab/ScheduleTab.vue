@@ -178,13 +178,17 @@ function handleShowPopup(detail: CandidateScheduleDetailModel){
 let countClick = 0
 
 function handleCalendarClick(e:any){
-    countClick++
-    if(countClick == 2){
-        getSchedule()
-        countClick = 0
-    }    
-    setTimeout(() => {countClick = 0}, 5000)
+    // countClick++
+    // if(countClick == 2){
+    //     getSchedule()
+    //     countClick = 0
+    // }    
+    // setTimeout(() => {countClick = 0}, 5000)
 }
+
+watch(() => range.value.end, (newVal) => {
+    getSchedule()
+})
 
 const displayList = ref<any[]>([])
 

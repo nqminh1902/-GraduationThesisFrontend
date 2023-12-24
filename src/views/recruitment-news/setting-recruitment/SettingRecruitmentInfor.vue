@@ -268,6 +268,14 @@ import { storeToRefs } from "pinia";
 import { ref } from "vue";
 import { DxDateBox, DxHtmlEditor, DxNumberBox, DxSelectBox, DxTextArea, DxTextBox } from "devextreme-vue";
 import {jobPositions, carrers, workLocations, currencys, workTypes} from "../../../mocks"
+import DataSource from "devextreme/data/data_source";
+import { PagingRequest } from "../../../models";
+import type { LoadOptions } from "devextreme/data";
+import WorkLocationApi from "../../../apis/work-location/work-location-api"
+import JobPositionApi from "../../../apis/job-position/job-position-api"
+
+const workLocationApi = new WorkLocationApi() 
+const jobPositionApi = new JobPositionApi() 
 
 const titleConfig = ref<DxTextBox>({
     placeholder: "Tiêu đề tin đăng",
@@ -293,13 +301,29 @@ const sizeValues = ['8pt', '10pt', '12pt', '14pt', '18pt', '24pt', '36pt']
 const fontValues = ['Arial', 'Georgia', 'Tahoma', 'Times New Roman', 'Verdana']
 const headerValues = [false, 1, 2, 3, 4, 5]
 
+const jobPositionData = new DataSource({
+    load: async (options: LoadOptions) => {
+        const param = new PagingRequest () 
+        param.Collums = ["JobPositionName"],
+        param.PageIndex = (options.skip || 0)/(options.take || 20) + 1,
+        param.PageSize = options.take || 15,
+        param.SearchValue = options.searchValue
+        const res = await jobPositionApi.getFilterPaging(param)
+        return res.data.Data.Data || []
+    },
+    byKey: async (id: any) => {
+        const res = await jobPositionApi.getByID(id)
+        return res.data.Data 
+    }
+})
+
 const jobPositionConfig = ref<DxSelectBox>({
     width: '100%',
     placeholder: 'Vị trí tuyển dụng',
     noDataText: 'Không có dữ liệu',
     displayExpr: "JobPositionName",
     valueExpr: "JobPositionID",
-    dataSource: jobPositions,
+    dataSource: jobPositionData,
     searchEnabled: true,
     onItemClick(e) {
         recruitment.value.JobPositionID = e.itemData.JobPositionID
@@ -321,13 +345,29 @@ const carrerConfig = ref<DxSelectBox>({
     }
 });
 
+const workLocationData = new DataSource({
+    load: async (options: LoadOptions) => {
+        const param = new PagingRequest () 
+        param.Collums = ["WorkLocationName"],
+        param.PageIndex = (options.skip || 0)/(options.take || 20) + 1,
+        param.PageSize = options.take || 15,
+        param.SearchValue = options.searchValue
+        const res = await workLocationApi.getFilterPaging(param)
+        return res.data.Data.Data || []
+    },
+    byKey: async (id: any) => {
+        const res = await workLocationApi.getByID(id)
+        return res.data.Data
+    }
+})
+
 const workLocationConfig = ref<DxSelectBox>({
     width: '100%',
     placeholder: 'Chọn Địa điểm làm việc',
     noDataText: 'Không có dữ liệu',
     displayExpr: "WorkLocationName",
     valueExpr: "WorkLocationID",
-    dataSource: workLocations,
+    dataSource: workLocationData,
     searchEnabled: true,
     onItemClick(e) {
         recruitment.value.WorkLocationID = e.itemData.WorkLocationID

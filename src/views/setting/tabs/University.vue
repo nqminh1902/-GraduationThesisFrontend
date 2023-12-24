@@ -15,17 +15,9 @@
                         />
                         <div class="text-white ml-[4px]">Thêm trường đại học</div>
                     </button>
-                    <button class="option-btn" id="option">
-                        <Icon
-                            :icon="'ep:arrow-down-bold'"
-                            :color="'#ffffff'"
-                            width="20"
-                            height="20"
-                        />
-                    </button>
                 </div>
             </div>
-            <div class="flex-1">
+            <div class="flex-1" style="height: calc(100% - 52px);">
                 <div class="h-[48px]">
                     <base-text-box :config="searchDefaultConfig" />
                 </div>
@@ -46,26 +38,6 @@
             </div>
         </div>
     </div>
-    <DxPopover 
-        :target="'#option'"
-        show-event="click"
-        :visible="false"
-        :hideOnOutsideClick="true"
-        position="bottom"
-        width="auto"
-        height="auto"
-        >
-            <div class="flex items-center h-[35px] cursor-pointer icon-export" @click="isShowPopupImport = true">
-                <Icon
-                    :icon="'mdi:import'"
-                    :color="'#7A8188'"
-                    width="24"
-                    height="24"
-                    class="mx-[4px]"
-                />
-                <div class="">Nhập khẩu</div>
-            </div>
-    </DxPopover>
     <base-popup
         v-if="isShowPopup"
         :config="popupConfig"
@@ -81,21 +53,24 @@
             <div class="add-category-body">
                 <div class="field">
                     <div class="lable">
-                        Tên trường đại học<span style="color: red"> *</span>
+                        Mã trường đại học<span style="color: red"> *</span>
                     </div>
 
                     <base-text-box
-                        :config="textBoxConfig"
+                        :config="textBoxCodeConfig"
+                        v-model="university.UniversityCode"
                         class="mb-6"
                     />
                 </div>
                 <div class="field">
                     <div class="lable">
-                        Trạng thái<span style="color: red"> *</span>
+                        Tên trường đại học<span style="color: red"> *</span>
                     </div>
 
-                    <base-select-box
-                        :config="selectBoxConfig"
+                    <base-text-box
+                        :config="textBoxConfig"
+                        v-model="university.UniversityName"
+                        class="mb-6"
                     />
                 </div>
             </div>
@@ -125,6 +100,7 @@
             </div>
         </template>
     </base-popup>
+    <popup-import-university v-if="isShowPopupImport" :is-show-popup="isShowPopupImport" @on-save="SaveImport()" @on-close="isShowPopupImport = false"></popup-import-university>
 </template>
 <script lang="ts" setup>
 import { Icon } from "@iconify/vue";
@@ -141,9 +117,14 @@ import {
 } from "../../../components/base/index";
 import { DxPopover } from 'devextreme-vue/popover';
 import { ref } from "vue";
-import { Column } from "devextreme/ui/data_grid";
+import type { Column } from "devextreme/ui/data_grid";
 import { PagingRequest } from "../../../models";
-import { BaseNavigationType } from "../../../types";
+import type { BaseNavigationType } from "../../../types";
+import { useToastStore } from "../../../stores";
+import { ToastType } from "../../../enums";
+import { UniversityModel } from "../../../models";
+import UniversityAPi from "../../../apis/university/university-api"
+import CustomStore from "devextreme/data/custom_store";
 
 
 const isShowPopupImport = ref(false)
@@ -152,7 +133,11 @@ const filterPaging = new PagingRequest();
 const baseTableRef = ref<InstanceType<typeof DxDataGrid>>(null)
 const showPopupDelete = ref(false)
 const isShowPopup = ref(false)
-const popupTitle = ref("Thêm vị trí");
+const popupTitle = ref("Thêm trường đại học");
+const toastStore = useToastStore();
+const isEdit = ref(false)
+const university = ref<UniversityModel>(new UniversityModel())
+const universityApi = new UniversityAPi()
 
 const popupConfig = ref<DxPopup>({
     height: "auto",
@@ -166,21 +151,24 @@ const textBoxConfig: DxTextBox = {
     },
 };
 
-const selectBoxConfig = ref<DxSelectBox>({
-    displayExpr: "name",
-    valueExpr: "id",
-    dataSource: [
-        {
-            id: 2,
-            name: "Không kích hoạt",
-        },
-        {
-            id: 1,
-            name: "Kích hoạt",
-        },
-    ],
-    searchEnabled: false,
-    onValueChanged: (e) => {},
+const textBoxCodeConfig : DxTextBox = {
+    placeholder: "Mã trường đại học",
+    onValueChanged: (e) => {
+        
+    },
+};
+
+const dataSource = new CustomStore({
+    key: "UniversityID",
+    async load(loadOptions) {
+        filterPaging.Collums = ["UniversityCode", "UniversityName"];
+        const res = await universityApi.getFilterPaging(filterPaging);
+        if (res) {
+            totalCount.value = res.data.Data.TotalCount;
+        }
+        return res.data.Data.Data || [];
+    },
+    loadMode: "processed",
 });
 
 const tableConfig = ref<DxDataGrid>({
@@ -191,6 +179,7 @@ const tableConfig = ref<DxDataGrid>({
             caption: "Mã trường đại học",
             dataField: "UniversityCode",
             dataType: "string",
+            width: 200
         },
         {
             alignment: "left",
@@ -199,7 +188,7 @@ const tableConfig = ref<DxDataGrid>({
             dataType: "string",
         },
     ] as (string | Column<any, any>)[],
-    dataSource: [],
+    dataSource: dataSource,
     keyExpr: "UniversityID",
     onSelectionChanged(e) {
     },
@@ -219,11 +208,14 @@ const searchDefaultConfig: DxTextBox = {
     ],
     onValueChanged: (e) => {
        filterPaging.SearchValue = e.value
+       filterPaging.PageIndex = 1
+       baseTableRef.value?.getInstance()?.refresh();
     }
 }
 
 async function handleDelete(event: any) { 
-
+    university.value = event
+    showPopupDelete.value = true
 }
 
 function pagingChange(e: BaseNavigationType) {
@@ -233,16 +225,73 @@ function pagingChange(e: BaseNavigationType) {
 }
 
 function handleAdd(){
+    university.value = new UniversityModel()
+    isEdit.value = false;
     isShowPopup.value = true
 }
 
 async function handleEdit(event: any) {
-    isShowPopup.value = true
+    try {
+        const res: any = await universityApi.getByID(event.UniversityID);
+        if (res?.data.Success) {
+            university.value = res?.data.Data;
+            popupTitle.value = "Sửa thông tin trường";
+            isEdit.value = true;
+            isShowPopup.value = true;
+        } else {
+            toastStore.toggleToast(
+                true,
+                "Lấy thông tin trường thất bại",
+                ToastType.error
+            );
+        }
+    } catch (error) {
+        toastStore.toggleToast(
+            true,
+            "Lấy thông tin trường thất bại",
+            ToastType.error
+        );
+    }
 }
 
 async function handleRemove() {
+    const res = await universityApi.delete(university.value.UniversityID)
+    if(res.data.Success){
+        toastStore.toggleToast(true, "Xóa trường đại học thành công", ToastType.success)
+        baseTableRef.value?.getInstance()?.refresh();
+        showPopupDelete.value = false
+    }else{
+        toastStore.toggleToast(true, "Xóa trường đại học thất bại", ToastType.error)
+    }
 }
+
 async function handleSave() {
+    if(isEdit.value){
+        const res = await universityApi.update(university.value.UniversityID, university.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Cập nhật trường đại học thành công", ToastType.success)
+            baseTableRef.value?.getInstance()?.refresh();
+            isShowPopup.value = false
+        }else{
+            toastStore.toggleToast(true, "Cập nhật trường đại học thất bại", ToastType.error)
+        }
+    }else{
+        const res = await universityApi.insert(university.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Thêm mới trường đại học thành công", ToastType.success)
+            baseTableRef.value?.getInstance()?.refresh();
+            isShowPopup.value = false
+        }else{
+            toastStore.toggleToast(true, "Thêm mới trường đại học thất bại", ToastType.error)
+        }
+    }
+}
+
+function SaveImport(){
+    isShowPopupImport.value = false
+    filterPaging.PageIndex = 1;
+    filterPaging.SearchValue = ""
+    baseTableRef.value?.getInstance()?.refresh();
 }
 </script>
 <style lang="scss" scoped>
@@ -278,7 +327,7 @@ async function handleSave() {
     font-size: 14px!important;
     height: 36px!important;
     padding: 8px 12px!important;
-    border-radius: 4px 0 0 4px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     background-color: #2680eb!important;

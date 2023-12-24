@@ -87,23 +87,20 @@
                                     </div>
                                     <div class="flex">
                                         <div class="field flex-1">
-                                            <div class="lable">Trình độ đào tạo <span style="color: red;">*</span></div>
-                                            <base-select-box :config="degreeConfig" v-model="candidate.EducationDegreeID" :class="{'border-red': errorMessage.Degree}"/>
-                                            <div class="validate-string">{{ errorMessage.Degree }}</div>
+                                            <div class="lable">Trình độ đào tạo</div>
+                                            <base-select-box :config="degreeConfig" v-model="candidate.EducationDegreeID"/>
                                         </div>
                                         <div class="w-[12px]"></div>
                                         <div class="field flex-1">
-                                            <div class="lable">Nơi đào tạo <span style="color: red;">*</span></div>
-                                            <base-select-box :config="trainingPlaceConfig" v-model="candidate.EducationPlaceID" :class="{'border-red': errorMessage.TrainingPlace}"/>
-                                            <div class="validate-string">{{ errorMessage.TrainingPlace }}</div>
+                                            <div class="lable">Nơi đào tạo </div>
+                                            <base-select-box :config="trainingPlaceConfig" v-model="candidate.EducationPlaceID"/>
                                         </div>
                                     </div>
                                     <div class="field">
-                                        <div class="lable">Chuyên ngành <span style="color: red;">*</span></div>
+                                        <div class="lable">Chuyên ngành</div>
                                         <base-select-box
-                                            :config="specializedConfig" v-model="candidate.EducationMajorID" :class="{'border-red': errorMessage.Major}"
+                                            :config="specializedConfig" v-model="candidate.EducationMajorID"
                                         />
-                                        <div class="validate-string">{{ errorMessage.Major }}</div>
                                     </div>
                                     <div class="flex">
                                         <div class="field flex-1">
@@ -112,9 +109,8 @@
                                         </div>
                                         <div class="w-[12px]"></div>
                                         <div class="field flex-1">
-                                            <div class="lable">Nguồn ứng viên <span style="color: red;">*</span></div>
-                                            <base-select-box :config="candidateSourceConfig" v-model="candidate.ChannelID" :class="{'border-red': errorMessage.Resource}"/>
-                                            <div class="validate-string">{{ errorMessage.Resource }}</div>
+                                            <div class="lable">Nguồn ứng viên</div>
+                                            <base-select-box :config="candidateSourceConfig" v-model="candidate.ChannelID"/>
                                         </div>
                                     </div>
                                     <div class="field">
@@ -201,9 +197,14 @@
         width="372px"
         >
         <div class="">
-            <div class="" v-for="item in recruitmentDetails" :key="item.RecruitmentDetailID">
-                <div class="">{{ item.Title }} <span>Vòng tuyển dụng: {{ item.RecruitmentRoundName }}</span></div>
-                <div class="">Trạng thái: {{ getStatus(item) }}</div>
+            <div class="d-flex items-center py-[8px]" v-for="(item) in recruitmentDetails" :key="item.RecruitmentDetailID">
+                <div class="recruitment-status">
+                        <div :class="'recruitment-status-' + item.Status"></div>
+                </div>
+                <div class="">
+                    <div class="">{{ item.Title }} </div>
+                    <div>Vòng tuyển dụng: {{ item.RecruitmentRoundName }}</div>
+                </div>
             </div>
         </div>
         </DxPopover>
@@ -235,9 +236,14 @@ import { useToastStore } from "../../../stores";
 import { StateEnum, ToastType } from "../../../enums";
 import axios from "axios";
 import _ from 'lodash';    
-import { RecruitmentDetailModel } from "../../../models";
+import { PagingRequest, RecruitmentDetailModel } from "../../../models";
 import { DxScrollView } from 'devextreme-vue/scroll-view';
 import { validateEmail } from "../../../utils";
+import DataSource from "devextreme/data/data_source";
+import CustomStore from "devextreme/data/custom_store";
+import type { LoadOptions } from "devextreme/data";
+import EducationMajorApi from "../../../apis/education-major/education-major-api"
+import UniversityAPi from "../../../apis/university/university-api"
 
 const props = withDefaults(defineProps<{
     isShowPopup: boolean
@@ -251,16 +257,15 @@ const props = withDefaults(defineProps<{
     isView: false
 });
 
+const educationMajorApi = new EducationMajorApi()
+const universityAPi = new UniversityAPi()
+
 const errorMessage = ref({
     CandidateName: "",
     BirthDay: "",
     Mobile: "",
     Email: "",
     Address: "",
-    Degree: "",
-    TrainingPlace: "",
-    Major: "",
-    Resource: ""
 })
 
 const emit = defineEmits(["onClose", "onSave"]);
@@ -282,7 +287,7 @@ const popupConfig = ref<DxPopup>({
     }
 });
 
-const widthPopup = ref(500)
+const widthPopup = ref(600)
 
 if(props.isEdit && props.candidateID){
     getCandidateByID()
@@ -340,16 +345,33 @@ const phoneConfig = ref<DxNumberBox>({
     format:""
 })
 
+const universityData = new DataSource({
+    load: async (options: LoadOptions) => {
+        const param = new PagingRequest () 
+        param.Collums = ["UniversityName"],
+        param.PageIndex = (options.skip || 0)/(options.take || 20) + 1,
+        param.PageSize = options.take || 15,
+        param.SearchValue = options.searchValue
+        const res = await universityAPi.getFilterPaging(param)
+        return res.data.Data.Data || []
+    },
+    byKey: async (id: any) => {
+        if(!id) return null
+        const res = await universityAPi.getByID(id)
+        return res.data.Data
+    }
+})
+
 const trainingPlaceConfig = ref<DxSelectBox>({
     width: '100%',
     placeholder: 'Chọn nơi đào tạo',
     noDataText: 'Không có dữ liệu',
-    displayExpr: "text",
-    valueExpr: "id",
-    dataSource: trainingPlaces,
+    displayExpr: "UniversityName",
+    valueExpr: "UniversityID",
+    dataSource: universityData,
     searchEnabled: true,
     onItemClick(e) {
-        candidate.value.EducationPlaceName = e.itemData.text 
+        candidate.value.EducationPlaceName = e.itemData.UniversityName 
     },
 })
 
@@ -366,16 +388,33 @@ const degreeConfig = ref<DxSelectBox>({
     },
 })
 
+const educationMajorData = new DataSource({
+    load: async (options: LoadOptions) => {
+        const param = new PagingRequest () 
+        param.Collums = ["EducationMajorName"],
+        param.PageIndex = (options.skip || 0)/(options.take || 20) + 1,
+        param.PageSize = options.take || 15,
+        param.SearchValue = options.searchValue
+        const res = await educationMajorApi.getFilterPaging(param)
+        return res.data.Data.Data || []
+    },
+    byKey: async (id: any) => {
+        if(!id) return null
+        const res = await educationMajorApi.getByID(id)
+        return res.data.Data
+    }
+})
+
 const specializedConfig = ref<DxSelectBox>({
     width: '100%',
     placeholder: 'Chuyên ngành',
     noDataText: 'Không có dữ liệu',
-    displayExpr: "text",
-    valueExpr: "id",
-    dataSource: specializeds,
+    displayExpr: "EducationMajorName",
+    valueExpr: "EducationMajorID",
+    dataSource: educationMajorData,
     searchEnabled: true,
     onItemClick(e) {
-        candidate.value.EducationMajorName = e.itemData.text
+        candidate.value.EducationMajorName = e.itemData.EducationMajorName
     },
 })
 
@@ -433,7 +472,7 @@ async function getCandidateByID(){
         candidate.value = res.data.Data
         workExperients.value = _.cloneDeep(candidate.value.WorkExperients)
         if(candidate.value.AttachmentCV){
-            widthPopup.value = 1000
+            widthPopup.value = 1200
         }
     }
 }
@@ -442,8 +481,6 @@ async function getRecruitmentDetailID(){
     const res = await recruitmentDetailApi.getByCandidateID(props.candidateID + "")
     if(res.data.Success){
         recruitmentDetails.value = res.data.Data
-        console.log(recruitmentDetails.value);
-        
     }
 }
 
@@ -496,7 +533,7 @@ function setCandidateAvatar(e: any){
     const formData = new FormData();
     formData.append("files", selectedFile);
     axios
-    .post("https://localhost:7236/api/Upload", formData, {
+    .post("http://localhost:7236/api/Upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -520,7 +557,7 @@ function setCVAttachment(e: any){
     const formData = new FormData();
     formData.append("files", selectedFile);
     axios
-    .post("https://localhost:7236/api/Upload", formData, {
+    .post("http://localhost:7236/api/Upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -567,32 +604,8 @@ function validate() : boolean{
         errorMessage.value.Mobile = "Số điện thoại không được để trống"
         result = false
     }
-    if(!candidate.value.EducationDegreeID){
-        errorMessage.value.Degree = "Trình độ đào tạo không được để trống"
-        result = false
-    }
-    if(!candidate.value.EducationMajorID){
-        errorMessage.value.Major = "Chuyên ngành không được để trống"
-        result = false
-    }
-    if(!candidate.value.EducationPlaceID){
-        errorMessage.value.TrainingPlace = "Nơi đào tạo không được để trống"
-        result = false
-    }
-    if(!candidate.value.ChannelID){
-        errorMessage.value.Resource = "Nguồn ứng viên không được để trống"
-        result = false
-    }
     return result
 }
-
-watch(() => candidate.value.ChannelID, (newVal) => {
-    if(newVal){
-        errorMessage.value.Resource = ""
-    }else{
-        errorMessage.value.Resource = "Nguồn ứng viên không được để trống"
-    }
-})
 
 watch(() => candidate.value.CandidateName, (newVal) => {
     if(newVal){
@@ -634,41 +647,6 @@ watch(() => candidate.value.Mobile, (newVal) => {
     }
 })
 
-watch(() => candidate.value.EducationDegreeID, (newVal) => {
-    if(newVal){
-        errorMessage.value.Degree = ""
-    }else{
-        errorMessage.value.Degree = "Trình độ đào tạo không được để trống"
-    }
-})
-
-watch(() => candidate.value.EducationMajorID, (newVal) => {
-    if(newVal){
-        errorMessage.value.Major = ""
-
-    }else{
-        errorMessage.value.Major = "Chuyên ngành không được để trống"
-    }
-})
-
-watch(() => candidate.value.EducationPlaceID, (newVal) => {
-    if(newVal){
-        errorMessage.value.TrainingPlace = ""
-    }else{
-        errorMessage.value.TrainingPlace = "Nơi đào tạo không được để trống"
-    }
-})
-
-
-function getStatus(item: RecruitmentDetailModel){
-    if(item.Status == 1 && item.IsEmployee == 1){
-        return "Nhân viên"
-    }else if(item.Status == 1){
-        return "Đang tuyển dụng"
-    }else{
-        return "Bị loại"
-    }
-}
 </script>
 <style lang="scss" scoped>
     .add-cv{
@@ -737,6 +715,26 @@ function getStatus(item: RecruitmentDetailModel){
     width: 100%;
     cursor: pointer;
     opacity: 0;
+}
+
+.recruitment-status{
+    margin-right: 12px;
+    width: fit-content;
+    .recruitment-status-1{
+        background-color: #48bb56 ;
+        width: 10px;
+        height: 10px;
+        border-radius:50%;
+        margin-top: 6px;
+    }
+
+    .recruitment-status-2{
+        background-color: red ;
+        width: 10px;
+        height: 10px;
+        border-radius:50%;
+        margin-top: 6px;
+    }
 }
 
 .heading-title{

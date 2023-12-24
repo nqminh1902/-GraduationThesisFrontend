@@ -185,7 +185,7 @@ async function handleFileChange(e: any){
     if(e.target.files) e.target.value = null;
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
     .add-cv{
         margin-bottom: 12px;
         position: relative;
@@ -204,4 +204,13 @@ async function handleFileChange(e: any){
         }
         
     }
+    .file-input{
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+    opacity: 0;
+}
 </style>

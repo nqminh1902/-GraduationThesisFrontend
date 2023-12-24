@@ -7,5 +7,5 @@ export class RecruitmentRoundModel extends BaseModel {
     RecruitmentID: number = 0
     SordOrder: number = 0
     IsSystem: boolean = false
-    IsHired: boolean = false
+    IsHired?: boolean = false
 }

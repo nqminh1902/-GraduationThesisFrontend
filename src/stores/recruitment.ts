@@ -25,7 +25,8 @@ export const useRecruitmentStore = defineStore('recruitmentStore', {
                 IsSystem: true,
                 RecruitmentID: 0,
                 RecruitmentRoundName: "Đã tuyển",
-                SordOrder: recruitmentRounds.length + 1
+                SordOrder: recruitmentRounds.length + 1,
+                IsHired: true
             })
             this.recruitment.RecruitmentRounds = recruitmentRounds
         },

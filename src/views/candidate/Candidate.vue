@@ -32,14 +32,25 @@
                     </button>
                 </div>
             </div>
-            <div class="toolbar">
+            <div class="toolbar" v-if="selectedRowKey.length == 0">
                 <base-text-box :config="searchDefaultConfig" />
+            </div>
+            <div class="toolbar" v-else>
+                <div class="flex items-center w-full h-[32px]">
+                    <div class="d-flex items-center ml-[16px]">
+                        <span class="mr-[4px]">Đã chọn: </span>
+                        <b>{{ selectedRowKey.length }}</b>
+                    </div>
+                    <base-button :config="ChangeRecruitmentConfig" class=" ml-[12px]"/>
+                    <base-button :config="DeleteMultipleConfig" class=" ml-[12px]"/>
+                </div>
             </div>
             <div class="grid">
                 <base-table
                     :config="tableConfig"
                     ref="baseTableRef"
                     @on-delete="handleDelete"
+                    @on-edit="handleEdit"
                 >
                     <template #date="data">
                         <div class="">{{ formatDate(data.data.data.ApplyDate) }}</div>
@@ -63,9 +74,11 @@
                 @onNavigationChange="pagingChange"
             />
         </div>
-        <popup-candidate v-if="isShowPopup" :isShowPopup="isShowPopup" :candidateID="candidateID" :is-edit="isUpdate" @onClose="isShowPopup = false"  @on-save="handleSaveSucces"></popup-candidate>
-        <popup-import-candidate v-if="isShowPopupImport" :isShowPopup="isShowPopupImport"  @onClose="isShowPopupImport = false" @on-save="handleSaveSucces"></popup-import-candidate>
     </div>
+    <popup-candidate v-if="isShowPopup" :isShowPopup="isShowPopup" :candidateID="candidateID" :is-edit="isUpdate" @onClose="isShowPopup = false"  @on-save="handleSaveSucces"></popup-candidate>
+    <popup-import-candidate v-if="isShowPopupImport" :isShowPopup="isShowPopupImport"  @onClose="isShowPopupImport = false" @on-save="handleSaveSucces"></popup-import-candidate>
+    <popup-change-recruitment v-if="isShowPopupChangeRecruitment" :selectedKey="selectedRowKey" :isShowPopup="isShowPopupChangeRecruitment" @onSave="handleSaveCandidate()" @onClose="isShowPopupChangeRecruitment = false"/>
+
     <DxPopover 
         :target="'#option'"
         show-event="click"
@@ -109,7 +122,7 @@ import type {
 import { ref } from "vue";
 import CustomStore from "devextreme/data/custom_store";
 import CollectionApi from "../../apis/collection/collection-api";
-import { CollectionModel, PagingRequest } from "../../models";
+import { CollectionModel, PagingRequest, RecruitmentDetailModel } from "../../models";
 import type { BaseNavigationType } from "../../types";
 import type DxTextBox from "devextreme-vue/text-box";
 import { ButtonStylingMode, ButtonType, ToastType } from "../../enums";
@@ -118,6 +131,7 @@ import type { Column } from "devextreme/ui/data_grid";
 import CandidateApi from "../../apis/candidate/candidate-api"
 import PopupCandidate from "./popup/PopupCandidate.vue"
 import PopupImportCandidate from "./popup/PopupImportCandidate.vue";
+import PopupChangeRecruitment from "../recruitment-news/recruitment-news-detail/popup/PopupChangeRecruitment.vue";
 import { formatDate } from "../../utils";
 import { DxPopover } from 'devextreme-vue/popover';
 
@@ -133,6 +147,8 @@ const collection = ref(new CollectionModel());
 const isShowPopupImport = ref<boolean>(false);
 const candidateID = ref(undefined)
 const popupTitle = ref("Thêm bộ sưu tập");
+const selectedRowData = ref<RecruitmentDetailModel[]>([])
+const selectedRowKey = ref<number[]>([])
 
 const dataSource = new CustomStore({
     key: "CandidateID",
@@ -241,14 +257,17 @@ const tableConfig = ref<DxDataGrid>({
     dataSource: dataSource,
     keyExpr: "CandidateID",
     onSelectionChanged(e) {
-        console.log(e);
-    },
-    onRowDblClick(e) {
-        candidateID.value = e.data.CandidateID
-        isUpdate.value = true
-        isShowPopup.value = true
+        selectedRowData.value = e.selectedRowsData
+        selectedRowKey.value = e.selectedRowKeys 
     },
 });
+
+function handleEdit(e: any){
+    candidateID.value = e.CandidateID
+    isUpdate.value = true
+    isShowPopup.value = true
+    
+}
 
 const searchDefaultConfig: DxTextBox = {
     width: 260,
@@ -270,6 +289,35 @@ const searchDefaultConfig: DxTextBox = {
     },
 };
 
+const DeleteMultipleConfig = ref<DxButton>({
+    type: ButtonType.danger,
+    height: '100%',
+    text: "Xóa ứng viên",
+    icon:"trash",
+    stylingMode: ButtonStylingMode.outlined,
+    async onClick(e) {
+        const res = await candidateApi.deleteBulk(selectedRowKey.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Xóa thành công", ToastType.success);
+            baseTableRef.value.getInstance().refresh();
+        }else{
+            toastStore.toggleToast(true, "Xóa thất bại", ToastType.error);
+        }
+    },
+})
+
+const isShowPopupChangeRecruitment = ref(false)
+
+const ChangeRecruitmentConfig = ref<DxButton>({
+    type: ButtonType.default,
+    height: '100%',
+    text: "Chuyển tin tuyển dụng",
+    stylingMode: ButtonStylingMode.contained,
+    icon: "arrowright",
+    onClick(e) {
+        isShowPopupChangeRecruitment.value = true
+    },
+})
 
 function handleAddCandidate(){
     collection.value = new CollectionModel();
@@ -315,7 +363,6 @@ function getInitials(name: string) {
 }
 
 async function handleDelete(event: any) {
-    
     const res = await candidateApi.delete(event.CandidateID)
     if(res.data.Success){
         toastStore.toggleToast(true, "Xóa thành công", ToastType.success);
@@ -323,6 +370,11 @@ async function handleDelete(event: any) {
     }else{
         toastStore.toggleToast(true, "Xóa thất bại", ToastType.error);
     }
+}
+
+function handleSaveCandidate(){
+    isShowPopupChangeRecruitment.value = false
+    baseTableRef.value.getInstance().refresh();
 }
 </script>
 

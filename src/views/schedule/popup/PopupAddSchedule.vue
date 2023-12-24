@@ -179,7 +179,12 @@ import _ from "lodash"
 import { Icon } from "@iconify/vue";
 import {councils} from "../../../mocks"
 import CandidateScheduleApi from "../../../apis/candidate-schedule/candidate-schedule-api"
-import { CandidateScheduleDetailModel, CandidateScheduleModel, RecruitmentBroadModel, RecruitmentDetailModel } from "../../../models";
+import { CandidateScheduleDetailModel, CandidateScheduleModel, PagingRequest, RecruitmentBroadModel, RecruitmentDetailModel } from "../../../models";
+import DataSource from "devextreme/data/data_source";
+import WorkLocationApi from "../../../apis/work-location/work-location-api"
+import type { LoadOptions } from "devextreme/data";
+
+const workLocationApi = new WorkLocationApi() 
 
  const props = withDefaults(defineProps<{
     isShowPopup: boolean
@@ -218,7 +223,7 @@ const listRecruitment = new CustomStore({
     },
     async byKey(key) {
         const res = await recruitmentApi.getByID(key);
-        return res.data.Data || [];
+        return res.data.Data;
     },
     loadMode: "raw",
 })
@@ -261,7 +266,34 @@ const startTimeConfig = ref<DxDateBox>({
     pickerType: "list",
     min: new Date(new Date().setHours(0,0,0,0)),
     max: new Date(new Date().setHours(23,59,59,999)),
-    interval: 15
+    interval: 15,
+    onValueChanged(e) {
+        let startTime = new Date(_.cloneDeep(new Date(new Date(candidateSchedule.value.EvaluationDate.setHours(e.value.getHours())).setMinutes(e.value.getMinutes()))))
+        candidateSchedule.value.CandidateScheduleDetails.forEach((detail) => {
+            let endTime = _.cloneDeep(startTime)
+            const endTimeMinute = endTime.setMinutes(endTime.getMinutes() + candidateSchedule.value.Duration)
+            detail.StartTime = startTime
+            detail.EndTime = new Date(endTimeMinute)
+            startTime = new Date(endTimeMinute)
+        })
+    },
+})
+
+const workLocationData = new DataSource({
+    load: async (options: LoadOptions) => {
+        const param = new PagingRequest () 
+        param.Collums = ["WorkLocationName"],
+        param.PageIndex = (options.skip || 0)/(options.take || 20) + 1,
+        param.PageSize = options.take || 15,
+        param.SearchValue = options.searchValue
+        const res = await workLocationApi.getFilterPaging(param)
+        return res.data.Data.Data || []
+    },
+    byKey: async (id: any) => {
+        if(!id) return null
+        const res = await workLocationApi.getByID(id)
+        return res.data.Data
+    }
 })
 
 const addressConfig = ref<DxSelectBox>({
@@ -270,7 +302,7 @@ const addressConfig = ref<DxSelectBox>({
     noDataText: 'Không có dữ liệu',
     displayExpr: "WorkLocationName",
     valueExpr: "WorkLocationID",
-    dataSource: workLocations,
+    dataSource: workLocationData,
     searchEnabled: true,
     onItemClick(e) {
         candidateSchedule.value.Address = e.itemData.WorkLocationName
@@ -278,7 +310,7 @@ const addressConfig = ref<DxSelectBox>({
 })
 
 const candidateConfig = ref<DxCheckBox>({
-    text: "Thông báo cho úng viên"
+    text: "Thông báo cho ứng viên"
 })
 
 const councilConfig = ref<DxCheckBox>({
@@ -335,6 +367,8 @@ async function handleSave(){
         detail.ScheduleName = candidateSchedule.value.ScheduleName
         detail.IsNotifyCandidate = candidateSchedule.value.IsNotifyCandidate
         detail.IsNotifyCouncil = candidateSchedule.value.IsNotifyCouncil
+        detail.EvaluationDate = candidateSchedule.value.EvaluationDate
+        detail.JobPositionName = candidateSchedule.value.JobPositionName
     });
     const res = await candidateScheduleApi.insert(candidateSchedule.value)
     if(res.data.Success){
@@ -430,6 +464,14 @@ watch(() => candidateSchedule.value.RecruitmentID, (newVal) => {
 
 function handleRemove(index: number){
         candidateSchedule.value.CandidateScheduleDetails.splice(index,1)
+        let startTime = new Date(_.cloneDeep(new Date(new Date(candidateSchedule.value.EvaluationDate.setHours(candidateSchedule.value.StartTime.getHours())).setMinutes(candidateSchedule.value.StartTime.getMinutes()))))
+        candidateSchedule.value.CandidateScheduleDetails.forEach((detail) => {
+            let endTime = _.cloneDeep(startTime)
+            const endTimeMinute = endTime.setMinutes(endTime.getMinutes() + candidateSchedule.value.Duration)
+            detail.StartTime = startTime
+            detail.EndTime = new Date(endTimeMinute)
+            startTime = new Date(endTimeMinute)
+        })
 }
 
 function getBackGroundColor(){

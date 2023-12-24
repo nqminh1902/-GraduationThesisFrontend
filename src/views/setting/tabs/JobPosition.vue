@@ -15,17 +15,9 @@
                         />
                         <div class="text-white ml-[4px]">Thêm vị trí</div>
                     </button>
-                    <button class="option-btn" id="option">
-                        <Icon
-                            :icon="'ep:arrow-down-bold'"
-                            :color="'#ffffff'"
-                            width="20"
-                            height="20"
-                        />
-                    </button>
                 </div>
             </div>
-            <div class="flex-1">
+            <div class="flex-1" style="height: calc(100% - 52px);">
                 <div class="h-[48px]">
                     <base-text-box :config="searchDefaultConfig" />
                 </div>
@@ -37,7 +29,8 @@
                         @on-edit="handleEdit"
                     >
                         <template #status="data">
-                            <div :class="data.data.data.Status == 1 ? 'publish' : 'stop'">{{ data.data.data.Status == 1 ? 'Đang sử dụng' : 'Ngưng sử dụng' }}</div>
+                            {{ test(data.data.data) }}
+                            <div :class="data.data.data.Status == '1' ? 'publish' : 'stop'">{{ data.data.data.Status == 1 ? 'Đang sử dụng' : 'Ngưng sử dụng' }}</div>
                         </template>               
                     </base-table>
                 </div>
@@ -49,26 +42,6 @@
             </div>
         </div>
     </div>
-    <DxPopover 
-        :target="'#option'"
-        show-event="click"
-        :visible="false"
-        :hideOnOutsideClick="true"
-        position="bottom"
-        width="auto"
-        height="auto"
-        >
-            <div class="flex items-center h-[35px] cursor-pointer icon-export" @click="isShowPopupImport = true">
-                <Icon
-                    :icon="'mdi:import'"
-                    :color="'#7A8188'"
-                    width="24"
-                    height="24"
-                    class="mx-[4px]"
-                />
-                <div class="">Nhập khẩu</div>
-            </div>
-    </DxPopover>
     <base-popup
         v-if="isShowPopup"
         :config="popupConfig"
@@ -89,6 +62,7 @@
 
                     <base-text-box
                         :config="textBoxConfig"
+                        v-model="jobPosition.JobPositionCode"
                         class="mb-6"
                     />
                 </div>
@@ -99,6 +73,7 @@
 
                     <base-text-box
                         :config="JobPositionNameConfig"
+                        v-model="jobPosition.JobPositionName"
                         class="mb-6"
                     />
                 </div>
@@ -109,6 +84,7 @@
 
                     <base-select-box
                         :config="selectBoxConfig"
+                        v-model="jobPosition.Status"
                     />
                 </div>
             </div>
@@ -154,10 +130,14 @@ import {
 } from "../../../components/base/index";
 import { DxPopover } from 'devextreme-vue/popover';
 import { ref } from "vue";
-import { Column } from "devextreme/ui/data_grid";
+import type { Column } from "devextreme/ui/data_grid";
 import { PagingRequest } from "../../../models";
-import { BaseNavigationType } from "../../../types";
-
+import type { BaseNavigationType } from "../../../types";
+import { useToastStore } from "../../../stores";
+import { JobPositionModel } from "@/models/JobPositionModel";
+import JobPositionApi from "../../../apis/job-position/job-position-api"
+import { ToastType } from "../../../enums";
+import CustomStore from "devextreme/data/custom_store";
 
 const isShowPopupImport = ref(false)
 const totalCount = ref(0)
@@ -166,6 +146,15 @@ const baseTableRef = ref<InstanceType<typeof DxDataGrid>>(null)
 const showPopupDelete = ref(false)
 const isShowPopup = ref(false)
 const popupTitle = ref("Thêm vị trí");
+const toastStore = useToastStore();
+const isEdit = ref(false)
+const jobPosition = ref<JobPositionModel>(new JobPositionModel())
+const jobPositionApi = new JobPositionApi()
+
+function test(log: any){
+    console.log(log);
+    
+}
 
 const popupConfig = ref<DxPopup>({
     height: "auto",
@@ -203,6 +192,19 @@ const selectBoxConfig = ref<DxSelectBox>({
     onValueChanged: (e) => {},
 });
 
+const dataSource = new CustomStore({
+    key: "JobPositionID",
+    async load(loadOptions) {
+        filterPaging.Collums = ["JobPositionCode", "JobPositionName"];
+        const res = await jobPositionApi.getFilterPaging(filterPaging);
+        if (res) {
+            totalCount.value = res.data.Data.TotalCount;
+        }
+        return res.data.Data.Data || [];
+    },
+    loadMode: "processed",
+});
+
 const tableConfig = ref<DxDataGrid>({
     width: '100%',
     columns: [
@@ -223,10 +225,11 @@ const tableConfig = ref<DxDataGrid>({
             caption: "Trạng thái",
             dataField: "Status",
             dataType: "string",
-            template: "status-template"
+            width: 150,
+            cellTemplate: "status-template"
         },
     ] as (string | Column<any, any>)[],
-    dataSource: [],
+    dataSource: dataSource,
     keyExpr: "JobPositionID",
     onSelectionChanged(e) {
     },
@@ -246,10 +249,13 @@ const searchDefaultConfig: DxTextBox = {
     ],
     onValueChanged: (e) => {
        filterPaging.SearchValue = e.value
+       filterPaging.PageIndex = 1
+       baseTableRef.value?.getInstance()?.refresh();
     }
 }
 
 async function handleDelete(event: any) { 
+    jobPosition.value = event
     showPopupDelete.value = true
 }
 
@@ -261,16 +267,66 @@ function pagingChange(e: BaseNavigationType) {
 
 
 function handleAdd(){
+    jobPosition.value = new JobPositionModel()
+    isEdit.value = false;
     isShowPopup.value = true
 }
 
 async function handleEdit(event: any) {
-    isShowPopup.value = true
+    try {
+        const res: any = await jobPositionApi.getByID(event.JobPositionID);
+        if (res?.data.Success) {
+            jobPosition.value = res?.data.Data;
+            popupTitle.value = "Sửa vị trí công việc";
+            isEdit.value = true;
+            isShowPopup.value = true;
+        } else {
+            toastStore.toggleToast(
+                true,
+                "Lấy thông tin vị trí công việc viên thất bại",
+                ToastType.error
+            );
+        }
+    } catch (error) {
+        toastStore.toggleToast(
+            true,
+            "Lấy thông tin vị trí công việc viên thất bại",
+            ToastType.error
+        );
+    }
 }
 
 async function handleRemove() {
+    const res = await jobPositionApi.delete(jobPosition.value.JobPositionID)
+    if(res.data.Success){
+        toastStore.toggleToast(true, "Xóa vị trí công việc thành công", ToastType.success)
+        baseTableRef.value?.getInstance()?.refresh();
+        showPopupDelete.value = false
+    }else{
+        toastStore.toggleToast(true, "Xóa vị trí công việc thất bại", ToastType.error)
+    }
 }
+
 async function handleSave() {
+    if(isEdit.value){
+        const res = await jobPositionApi.update(jobPosition.value.JobPositionID, jobPosition.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Cập nhật vị trí công việc thành công", ToastType.success)
+            baseTableRef.value?.getInstance()?.refresh();
+            isShowPopup.value = false
+        }else{
+            toastStore.toggleToast(true, "Cập nhật vị trí công việc thất bại", ToastType.error)
+        }
+    }else{
+        const res = await jobPositionApi.insert(jobPosition.value)
+        if(res.data.Success){
+            toastStore.toggleToast(true, "Thêm mới vị trí công việc thành công", ToastType.success)
+            baseTableRef.value?.getInstance()?.refresh();
+            isShowPopup.value = false
+        }else{
+            toastStore.toggleToast(true, "Thêm mới vị trí công việc thất bại", ToastType.error)
+        }
+    }
 }
 </script>
 <style lang="scss" scoped>
@@ -318,18 +374,20 @@ async function handleSave() {
     font-size: 14px!important;
     height: 36px!important;
     padding: 8px 12px!important;
-    border-radius: 0px 4px 4px 0px;
+    border-radius: 4px;
     background-color: #2680eb!important;
 }
 .publish{
-    border: solid 1px #48bb56!important;
     color: #48bb56!important;
-    height: 34px;
+    display: flex;
+    align-items: center;
+    height: 30px;
 }
 .stop{
-    border: solid 1px red!important;
     color: red!important;
-    height: 34px;
+    display: flex;
+    align-items: center;
+    height: 30px;
 }
 .add-category-header {
     width: 100%;

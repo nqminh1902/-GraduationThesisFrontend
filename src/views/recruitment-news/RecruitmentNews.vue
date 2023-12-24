@@ -18,6 +18,7 @@
             </div>
             <div class="toolbar">
                 <base-text-box :config="searchDefaultConfig" />
+                <base-select-box :config="statusConfig" class="ml-[8px]" v-model="currentStatus"/>
             </div>
             <div class="list-recruitment" ref="recruitmentBlock" @scroll="handleScroll">
                 <div class="list-item" v-for="recruiment in recruitments" :key="recruiment.RecruitmentID">
@@ -155,6 +156,7 @@ const { t, getLocale, setLocale } = useI18n();
 const router = useRouter()
 const filterPaging = new PagingRequest();
 const recruitmentApi = new RecruitmentApi()
+const currentStatus = 0
 
 const searchDefaultConfig: DxTextBox = {
     width: 260,
@@ -170,6 +172,7 @@ const searchDefaultConfig: DxTextBox = {
     ],
     onValueChanged: (e) => {
         filterPaging.SearchValue = e.value
+        filterPaging.PageIndex = 1
         recruitments.value = []
         getRecruitmentNews()
     },
@@ -187,6 +190,40 @@ const buttonConfig = ref<DxButton>({
     },
 });
 
+const statusConfig = ref<DxSelectBox>({
+    valueExpr: "id",
+    displayExpr: "text",
+    dataSource: [
+        {
+            id: 0,
+            text: "Tất cả"
+        },
+        {
+            id: 1,
+            text: "Đang tuyển dụng"
+        },
+        {
+            id: 2,
+            text: "Ngưng tuyển dụng"
+        }
+    ],
+    onValueChanged(e) {
+        filterPaging.PageIndex = 1
+        switch (e.value) {
+            case 1:
+                filterPaging.CustomFilter = btoa(JSON.stringify([["Status", "=", "1"]]))
+                break;
+            case 2:
+                filterPaging.CustomFilter = btoa(JSON.stringify([["Status", "=", "2"]]))
+                break;
+            default:
+                filterPaging.CustomFilter = ""
+                break;
+        }
+        getRecruitmentNews()
+    },
+})
+
 const recruitments = ref<RecruitmentModel[]>([])
 const totalCount = ref(0)
 const isShowPopover = ref(0)
@@ -201,13 +238,17 @@ function handleOpenMoreInfor(recruimnetID: number){
     isMoreInfor.value = recruimnetID
 }
 
-async function getRecruitmentNews(){
+async function getRecruitmentNews(isScroll: boolean = false){
     filterPaging.Collums = ["Title", "JobPositionName"]
     filterPaging.PageIndex = 1
     filterPaging.PageSize = 1000
     const res = await recruitmentApi.getFilterPaging(filterPaging);
         if (res) {
-            recruitments.value.push(...res.data.Data.Data);
+            if(isScroll){
+                recruitments.value.push(...res.data.Data.Data);
+            }else{
+                recruitments.value = res.data.Data.Data;
+            }
             totalCount.value = res.data.Data.TotalCount
         }
         return res.data.Data.Data || [];
@@ -225,7 +266,7 @@ function handleScroll() {
           // Kiểm tra nếu đã cuộn đến cuối phần tử
           if (scrollTop + clientHeight >= scrollHeight && recruitments.value.length < totalCount.value) {
             filterPaging.PageIndex++;
-            getRecruitmentNews()
+            getRecruitmentNews(true)
           }
     }
 }
@@ -274,7 +315,6 @@ function detailPage(recruitmentId: number){
         width: 100%;
         display: flex;
         align-items: center;
-        justify-content: space-between;
     }
     .list-recruitment{
         width: 100%;

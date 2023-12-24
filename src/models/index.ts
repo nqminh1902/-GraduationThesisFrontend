@@ -16,3 +16,5 @@ export * from './RecruitmentDetailModel'
 export * from "./RecruimentBroadModel"
 export * from "./CandidateSchedule"
 export * from "./CandidateScheduleDetail"
+export * from "./UniversityModel"
+export * from "./EducationMajorModel"

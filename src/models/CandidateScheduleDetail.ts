@@ -21,4 +21,5 @@ export class CandidateScheduleDetailModel extends BaseModel {
     RecruitmentID?: number
     RecruitmentTitle?: string
     EvaluationDate?: Date
+    JobPositionName?: string
 }

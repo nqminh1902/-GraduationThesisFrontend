@@ -12,9 +12,8 @@
             <h2 class="px-[8px]">Chỉnh sửa lịch</h2>
             <div class="mt-[16px] px-[8px]" >
                 <div class="flex items-center">
-                    <div class="recruitment-text font-medium">Nguyễn Quang Minh</div>
-                    <div class="status"></div>
-                    <div class="recruitment-text">Tin tuyển dụng SA</div>
+                    <div class="recruitment-text font-medium">{{ candidateScheduleDetail.CandidateName }}</div>
+                    <div class="recruitment-text ml-[4px]">{{ candidateScheduleDetail.RecruitmentTitle }}</div>
                 </div>
             </div>
             <div class="p-[8px] mt-[12px] flex" style="height: calc(100% - 28px);">
@@ -120,9 +119,12 @@ import CustomStore from "devextreme/data/custom_store";
 import { DxPopover } from 'devextreme-vue/popover';
 import { DxScrollView } from "devextreme-vue/scroll-view";
 import CandidateScheduleDetailApi from "../../../apis/candidate-schedule/candidate-schedule-detail";
-import { CandidateScheduleDetailModel } from "../../../models";
+import { CandidateScheduleDetailModel, PagingRequest } from "../../../models";
 import { schedule, workLocations } from "../../../mocks";
 import _ from "lodash"
+import WorkLocationApi from "../../../apis/work-location/work-location-api"
+import DataSource from "devextreme/data/data_source";
+import type { LoadOptions } from "devextreme/data";
 
 const props = withDefaults(defineProps<{
     isShowPopup: boolean
@@ -132,6 +134,8 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits(["onClose", "onSave"]);
+
+const workLocationApi = new WorkLocationApi() 
 
 const roomConfig = ref<DxTextBox>({
     placeholder: "Phòng"
@@ -152,13 +156,32 @@ const startTimeConfig = ref<DxDateBox>({
     validationError: false,
 })
 
+
+
+const workLocationData = new DataSource({
+    load: async (options: LoadOptions) => {
+        const param = new PagingRequest () 
+        param.Collums = ["WorkLocationName"],
+        param.PageIndex = (options.skip || 0)/(options.take || 20) + 1,
+        param.PageSize = options.take || 15,
+        param.SearchValue = options.searchValue
+        const res = await workLocationApi.getFilterPaging(param)
+        return res.data.Data.Data || []
+    },
+    byKey: async (id: any) => {
+        if(!id) return null
+        const res = await workLocationApi.getByID(id)
+        return res.data.Data
+    }
+})
+
 const addressConfig = ref<DxSelectBox>({
     width: '100%',
     placeholder: 'Địa chỉ',
     noDataText: 'Không có dữ liệu',
     displayExpr: "WorkLocationName",
     valueExpr: "WorkLocationID",
-    dataSource: workLocations,
+    dataSource: workLocationData,
     searchEnabled: true,
     onItemClick(e) {
         candidateScheduleDetail.value.Address = e.itemData.WorkLocationName
@@ -184,7 +207,7 @@ const scheduleConfig = ref<DxSelectBox>({
 })
 
 const candidateConfig = ref<DxCheckBox>({
-    text: "Thông báo cho úng viên"
+    text: "Thông báo cho ứng viên"
 })
 
 const councilConfig = ref<DxCheckBox>({

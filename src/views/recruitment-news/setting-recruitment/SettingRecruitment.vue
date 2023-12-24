@@ -9,7 +9,7 @@
                 class="cursor-pointer"
                 @click="backPage"
             />
-            <div class="title">{{ isEdit ? "Sửa tin" : "Thêm mói" }}</div>
+            <div class="title">{{ isEdit ? "Sửa tin" : "Thêm mới" }}</div>
         </div>
         <div class="setting-content">
             <div class="setting-sidebar">
@@ -53,11 +53,51 @@
             <div class="setting-btn">
                 <div class="group-btn">
                     <base-button :config="buttonSaveConfig" class="mb-[12px]"/>
-                    <base-button :config="buttonDraftConfig" />
+                    <div class="tab-status rounded-[4px] flex items-center cursor-pointer justify-between" :class="recruitment.Status == 1 ? 'publish' : 'stop'" id="status">
+                        <div class="recruitment-status">
+                            <div :class="'recruitment-status-' + recruitment.Status"></div>
+                        </div>
+                        <div class="">{{ recruitment.Status == 1 ? "Tuyển dụng" : "Ngưng tuyển dụng" }}</div>
+                        <Icon
+                            :icon="'icon-park-outline:down'"
+                            width="20"
+                            height="20"
+                            class="ml-[4px] mr-[16px]"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <DxPopover 
+        target="#status"
+        show-event="click"
+        :visible="false"
+        :hideOnOutsideClick="true"
+        position="bottom"
+        width="250"
+        >
+        <div class="">
+            <div class="flex cursor-pointer hover:bg-[#e1eeffcc] p-[8px] hover:rounded-[4px]" v-if="recruitment.Status != 2" @click="handleUpdateStatus(2)">
+                <div class="recruitment-status items-center flex" style="margin-left: 0;">
+                    <div class="recruitment-status-2"></div>
+                </div>
+                <div class="flex-1">
+                    <div class="font-bold">Ngừng nhận hồ sơ</div>
+                    <div class="">Tin sẽ được gỡ khỏi các kênh tuyển dụng. Không cho phép nộp đơn ứng tuyển</div>
+                </div>
+            </div>
+            <div class="flex cursor-pointer hover:bg-[#e1eeffcc] p-[8px] hover:rounded-[4px] mt-[12px]"  v-if="recruitment.Status != 1" @click="handleUpdateStatus(1)">
+                <div class="recruitment-status items-center flex" style="margin-left: 0;">
+                    <div class="recruitment-status-1"></div>
+                </div>
+                <div class="flex-1">
+                    <div class="font-bold">Tuyển dụng</div>
+                    <div class="">Thiết tục nhận hồ sơ</div>
+                </div>
+            </div>
+        </div>
+    </DxPopover>
 </template>
 <script lang="ts" setup>
 import { Icon } from "@iconify/vue";
@@ -81,6 +121,7 @@ import RecruitmentApi from "../../../apis/recruitment/recruitment-api"
 import { useRoute, useRouter } from "vue-router";
 import { RecruitmentModel } from "../../../models";
 import { useToastStore } from "../../../stores";
+import { DxPopover } from 'devextreme-vue/popover';
 
 const recruitmentStore = useRecruitmentStore()
 const {recruitment} = storeToRefs(recruitmentStore)
@@ -233,6 +274,11 @@ function backPage(){
     router.push({name: "recruitment-news"})
 }
 
+
+async function handleUpdateStatus(status: number){
+    recruitment.value.Status = status
+}
+
 </script>
 
 
@@ -283,7 +329,7 @@ function backPage(){
     }
     .setting-btn{
         right: 0;
-        width: 230px;
+        width: 260px;
         padding: 8px;
         height: 100%;
         background-color: #F1F2F6;
@@ -293,6 +339,33 @@ function backPage(){
             padding: 24px;
             border-radius: 6px;
         }
+    }
+}
+.publish{
+    border: solid 1px #48bb56!important;
+    color: #48bb56!important;
+    height: 34px;
+}
+.stop{
+    border: solid 1px red!important;
+    color: red!important;
+    height: 34px;
+}
+.recruitment-status{
+    margin: 0 8px;
+    width: fit-content;
+    .recruitment-status-1{
+        background-color: #48bb56 ;
+        width: 10px;
+        height: 10px;
+        border-radius:50%;
+    }
+
+    .recruitment-status-2{
+        background-color: red ;
+        width: 10px;
+        height: 10px;
+        border-radius:50%;
     }
 }
 .active {

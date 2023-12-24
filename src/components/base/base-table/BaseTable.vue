@@ -17,8 +17,8 @@
                 <slot name="birthday" :data="data"></slot>
             </template>
             <template #cell-template="{ data }">
-                <div class="h-[30px]" v-if="!data.value"> -- </div>
-                <div class="h-[30px]" v-else >{{ data.value }}</div>
+                <div class="h-[30px] flex items-center " v-if="!data.value"> -- </div>
+                <div class="h-[30px] flex items-center" v-else >{{ data.value }}</div>
             </template>
             <template #feature-cell="{ data }">
                 <div class="feature-wrap" v-if="isShowCustomButton">

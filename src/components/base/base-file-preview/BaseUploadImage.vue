@@ -92,7 +92,7 @@ function handleUploadFile(error: any, file: any) {
   const formData = new FormData();
   formData.append("files", file.file);
   axios
-    .post("https://localhost:7236/api/Upload", formData, {
+    .post("http://localhost:7236/api/Upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -118,7 +118,7 @@ function handleRemoveFile(error: any, file: any) {
     const imageDelete = props.listImage.find(item => item.PathName == file.file?.name)
     if(imageDelete){
           axios
-              .delete(`https://localhost:7236/api/Upload/${imageDelete.ImageID}`)
+              .delete(`http://localhost:7236/api/Upload/${imageDelete.ImageID}`)
               .then((response) => {
                 const listImage = props.listImage.filter(item => item.PathName !== file.file?.name)
                 emit("onDelete", listImage)
@@ -133,7 +133,7 @@ function handleDeleteImage(image: ProductImageModel){
   const imageDelete = props.listImage.find(item => item.ImageID == image.ImageID)
     if(imageDelete){
           axios
-              .delete(`https://localhost:7236/api/Upload/${imageDelete.ImageID}`)
+              .delete(`http://localhost:7236/api/Upload/${imageDelete.ImageID}`)
               .then((response) => {
                 const listImage = props.listImage.filter(item => item.ImageID !== image.ImageID)
                 emit("onDelete", listImage)

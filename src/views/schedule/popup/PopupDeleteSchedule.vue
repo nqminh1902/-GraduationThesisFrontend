@@ -12,10 +12,6 @@
             <h2 style="color: #e54848!important;">Xóa lịch</h2>
             <div class="p-[8px]">
                 <div>Lịch sẽ hủy sau khi thực hiện thao tác này, bạn có muốn gửi email thông báo cho hội đồng tuyển dụng và ứng viên không ?</div>
-                <div class="h-[12px]"></div>
-                <base-check-box :config="councilConfig" v-model="council"/>
-                <div class="h-[12px]"></div>
-                <base-check-box :config="candidateConfig" v-model="candidate"/>
             </div>
         </template>
     </base-popup>
@@ -53,15 +49,6 @@ const popupConfig = ref<DxPopup>({
 
 const council = ref(true)
 const candidate = ref(true)
-
-const candidateConfig = ref<DxCheckBox>({
-    text: "Thông báo cho úng viên"
-})
-
-const councilConfig = ref<DxCheckBox>({
-    text: "Thông báo cho hội đồng",
-})
-
 
 const toastStore = useToastStore();
 

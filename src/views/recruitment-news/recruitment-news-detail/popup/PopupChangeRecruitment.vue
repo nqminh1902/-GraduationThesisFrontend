@@ -177,11 +177,11 @@ async function handleSave(){
     }
     const res = await recruitmentDetailApi.changeRecruitment(props.selectedKey, selectedRecruitmentID.value, selectedChoose.value,selectedRound.value,selectedPeriod.value)
     if(res && res.data.Success){
-        toastStore.toggleToast(true, "Chuyển vòng thành công", ToastType.success);
+        toastStore.toggleToast(true, "Chuyển tin thành công", ToastType.success);
+        emit("onSave")
     }else{
-        toastStore.toggleToast(true, "Chuyển vòng thất bại", ToastType.error);
+        toastStore.toggleToast(true, "Chuyển tin thất bại", ToastType.error);
     }
-    emit("onSave")
 }
 
 </script>

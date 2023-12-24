@@ -55,7 +55,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-const routeActive = ref("infor")
+const routeActive = ref("job-position")
 const route = useRoute()
 const router = useRouter()
 function ChangeRouter(name: string){

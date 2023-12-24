@@ -14,7 +14,23 @@ export default class ImportApi {
     }
 
     validateCandidateImportData(file: FormData): Promise<AxiosResponse<ServiceResponse>> {
-        return axios.post('https://localhost:7236/api/Import/validate-candidate-import', file, {
+        return axios.post('http://localhost:7236/api/Import/validate-candidate-import', file, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            }
+        });
+    }
+
+    validateEducationMajorImportData(file: FormData): Promise<AxiosResponse<ServiceResponse>> {
+        return axios.post('http://localhost:7236/api/Import/validate-education-major-import', file, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            }
+        });
+    }
+
+    validateUniversityImportData(file: FormData): Promise<AxiosResponse<ServiceResponse>> {
+        return axios.post('http://localhost:7236/api/Import/validate-university-import', file, {
             headers: {
                 "Content-Type": "multipart/form-data",
             }

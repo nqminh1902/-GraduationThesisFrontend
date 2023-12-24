@@ -33,7 +33,12 @@ import {
     BaseSelectBox
 } from "../../../../components/base/index";
 import CustomStore from "devextreme/data/custom_store";
+import DataSource from "devextreme/data/data_source";
+import type { LoadOptions } from "devextreme/data";
+import { PagingRequest } from "../../../../models";
+import ReasonEliminateApi from "../../../../apis/eliminate-reason/eliminate-reason-api"
 
+const reasonEliminateApi = new ReasonEliminateApi()
 const recruitmentDetailApi = new RecruitmentDetailApi();
  const props = withDefaults(defineProps<{
     isShowPopup: boolean
@@ -47,29 +52,28 @@ const emit = defineEmits(["onClose", "onSave"]);
 
 const selectedValue = ref(0)
 
+const eliminateData = new DataSource({
+    load: async (options: LoadOptions) => {
+        const param = new PagingRequest () 
+        param.Collums = ["Reason"],
+        param.PageIndex = (options.skip || 0)/(options.take || 20) + 1,
+        param.PageSize = options.take || 15,
+        param.SearchValue = options.searchValue
+        const res = await reasonEliminateApi.getFilterPaging(param)
+        return res.data.Data.Data || []
+    },
+    byKey: async (id: any) => {
+        const res = await reasonEliminateApi.getByID(id)
+        return res.data.Data
+    }
+})
+
 const selectBoxConfig = ref<DxSelectBox>({
     placeholder: "Chọn lý do loại",
     valueExpr: "EliminateID",
     width: 400,
     displayExpr: "Reason",
-    dataSource: [
-        {
-            EliminateID: 1,
-            Reason: "Không phù hợp với văn hóa doanh nghiệp"
-        },
-        {
-            EliminateID: 2,
-            Reason: "Không đáp ứng được nhu cầu tuyển dụng"
-        },
-        {
-            EliminateID: 3,
-            Reason: "Mức lương đưa ra không phù hợp"
-        },
-        {
-            EliminateID: 4,
-            Reason: "Không tham gia thi tuyển/ phỏng vấn"
-        }
-    ]
+    dataSource: eliminateData
 })
 
 const candidateConfig = ref<DxCheckBox>({

@@ -27,7 +27,7 @@
             </div>
             <base-button :config="buttonConfig" />
         </div>
-        <div class="mt-[16px] w-full overflow-y-auto" style="height: calc(100% - 48px - 16px)">
+        <div class="mt-[16px] w-full overflow-y-auto" v-if="displayList.length" style="height: calc(100% - 48px - 16px)">
             <div class="schedule mb-[12px]" v-for="(item, index) of displayList" :key="index">
                 <div class="schedule-time">{{ formatDate(item.Date) }}</div>
                 <div class="flex schedule-detail" @click="handleShowPopup(schedule)" v-for="schedule of item.Schedule" :key="schedule.CandidateScheduleDetailID">
@@ -42,8 +42,7 @@
                                     </div>
                                     <span class="ml-[12px] font-medium">{{ schedule.CandidateName }}</span>
                                 </div>
-                                <div class="recruitment-name flex items-center">
-                                    <div class="status"></div>
+                                <div class="recruitment-name flex items-center ml-[4px]">
                                     <div class="recruitment-text">{{ schedule.RecruitmentTitle }}</div>
                                 </div>
                             </div>    
@@ -53,13 +52,18 @@
                 </div>
             </div>
         </div>
+        <div class="mt-[16px] w-full flex-col d-flex items-center justify-center" v-else style="height: calc(100% - 48px - 16px)">
+            <h3 class="font-bold color-[#ddd]">Chưa có lịch phỏng vấn</h3>
+            <p class="color-[#ddd]">Đặt lịch để quản lý thời gian thi tuyển phỏng vấn của ứng viên</p>
+
+        </div>
     </div>
     <popup-add-schedule v-if="isShowPopup" :is-show-popup="isShowPopup" @on-close="isShowPopup = false" @on-save="handleSave(1)"/>
     <popup-detail-schedule v-if="isShowPopupDetail" :scheduleDetail="selectedScheduleDetail" :is-show-popup="isShowPopupDetail" @on-close="isShowPopupDetail = false" @on-save="handleSave(2)"/>
 </template>
 <script setup lang="ts">
 import { DxButton, DxTextBox } from "devextreme-vue";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import {
     BaseTextBox,
     BaseButton
@@ -167,13 +171,17 @@ function handleShowPopup(detail: CandidateScheduleDetailModel){
 let countClick = 0
 
 function handleCalendarClick(e:any){
-    countClick++
-    if(countClick == 2){
-        getSchedule()
-        countClick = 0
-    }    
-    setTimeout(() => {countClick = 0}, 5000)
+    // countClick++
+    // if(countClick == 2){
+    //     getSchedule()
+    //     countClick = 0
+    // }    
+    // setTimeout(() => {countClick = 0}, 5000)
 }
+
+watch(() => range.value.end, (newVal) => {
+    getSchedule()
+})
 
 const displayList = ref<any[]>([])
 

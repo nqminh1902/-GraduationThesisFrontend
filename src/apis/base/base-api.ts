@@ -18,7 +18,7 @@ export default class BaseApi<T> {
     }
 
     getByID(id: string | number): Promise<AxiosResponse<ServiceResponse>> {
-        return this.baseApi.get(this.controller + `/${id}`);
+        return this.baseApi.get(this.controller + "/" + `${id}`);
     }
 
     getFilterPaging(

@@ -235,7 +235,7 @@ const listRecruitment = new CustomStore({
     },
     async byKey(key) {
         const res = await recruitmentApi.getByID(key);
-        return res.data.Data || [];
+        return res.data.Data;
     },
     loadMode: "raw",
 })

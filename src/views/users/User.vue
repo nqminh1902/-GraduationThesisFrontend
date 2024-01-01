@@ -4,13 +4,13 @@
             <div class="content-title">
                 <div class="flex items-center">
                     <Icon
-                        :icon="'mdi:users'"
+                        :icon="'ri:user-fill'"
                         :color="'#2563eb'"
                         width="24"
                         height="24"
                         class="mr-6"
                     />
-                    <div class="text-title">Ứng viên</div>
+                    <div class="text-title">Người dùng</div>
                 </div>
                 <div class="flex">
                     <button class="candidate-btn" @click="handleAddCandidate">
@@ -20,15 +20,7 @@
                             width="20"
                             height="20"
                         />
-                        <div class="text-white ml-[4px]">Thêm ứng viên</div>
-                    </button>
-                    <button class="option-btn" id="option">
-                        <Icon
-                            :icon="'ep:arrow-down-bold'"
-                            :color="'#ffffff'"
-                            width="20"
-                            height="20"
-                        />
+                        <div class="text-white ml-[4px]">Thêm người dùng</div>
                     </button>
                 </div>
             </div>
@@ -41,9 +33,7 @@
                         <span class="mr-[4px]">Đã chọn: </span>
                         <b>{{ selectedRowKey.length }}</b>
                     </div>
-                    <base-button :config="ChangeRecruitmentConfig" class=" ml-[12px]"/>
                     <base-button :config="DeleteMultipleConfig" class=" ml-[12px]"/>
-                    <base-button :config="ExportConfig" class=" ml-[12px]"/>
                 </div>
             </div>
             <div class="grid">
@@ -53,19 +43,22 @@
                     @on-delete="handleDelete"
                     @on-edit="handleEdit"
                 >
-                    <template #date="data">
-                        <div class="">{{ formatDate(data.data.data.ApplyDate) }}</div>
-                    </template>
                     <template #birthday="data">
-                        <div class="">{{ formatDate(data.data.data.Birthday) }}</div>
+                        <div class="">{{ formatDate(data.data.data.BirthDay) }}</div>
+                    </template>
+                    <template #status="data">
+                        <div :class="data.data.data.Status == '1' ? 'publish' : 'stop'">{{ data.data.data.Status == 1 ? 'Đang hoạt động' : 'Ngưng hoạt động' }}</div>
+                    </template>
+                    <template #gender="data">
+                        {{ data.data.data.Gender == 0 ? 'Nam' : 'Nữ' }}
                     </template>
                     <template #name="data">
                         <div class="flex items-center">
                             <img style="width: 30px; height: 30px; border-radius: 50%;" v-if="data.data.data.Avatar" :src="data.data.data.Avatar" alt="">
                             <div class="text-center" :style="{backgroundColor: getBackGroundColor()}" style="width: 30px; height: 30px; border-radius: 50%;" v-else>
-                                <p class="text-white leading-[30px] text-[13px] font-medium">{{ getInitials(data.data.data.CandidateName) }}</p>
+                                <p class="text-white leading-[30px] text-[13px] font-medium">{{ getInitials(data.data.data.FullName) }}</p>
                             </div>
-                            <span class="ml-[12px]">{{ data.data.data.CandidateName }}</span>
+                            <span class="ml-[12px]">{{ data.data.data.FullName }}</span>
                         </div>
                     </template>
                 </base-table>
@@ -76,10 +69,7 @@
             />
         </div>
     </div>
-    <popup-candidate v-if="isShowPopup" :isShowPopup="isShowPopup" :candidateID="candidateID" :is-edit="isUpdate" @onClose="isShowPopup = false"  @on-save="handleSaveSucces"></popup-candidate>
-    <popup-import-candidate v-if="isShowPopupImport" :isShowPopup="isShowPopupImport"  @onClose="isShowPopupImport = false" @on-save="handleSaveSucces"></popup-import-candidate>
-    <popup-change-recruitment v-if="isShowPopupChangeRecruitment" :selectedKey="selectedRowKey" :isShowPopup="isShowPopupChangeRecruitment" @onSave="handleSaveCandidate()" @onClose="isShowPopupChangeRecruitment = false"/>
-
+    <popup-user v-if="isShowPopup" :isShowPopup="isShowPopup" :is-edit="isUpdate" :user-i-d="userID" @onClose="isShowPopup = false" @on-save="handleSaveSucces"></popup-user>
     <DxPopover 
         :target="'#option'"
         show-event="click"
@@ -116,47 +106,37 @@ import {
 import { Icon } from "@iconify/vue";
 import type {
     DxButton,
-    DxDataGrid,
-    DxPopup,
-    DxSelectBox,
+    DxDataGrid
 } from "devextreme-vue";
 import { ref } from "vue";
 import CustomStore from "devextreme/data/custom_store";
-import CollectionApi from "../../apis/collection/collection-api";
-import { CollectionModel, PagingRequest, RecruitmentDetailModel } from "../../models";
+import {PagingRequest } from "../../models";
 import type { BaseNavigationType } from "../../types";
 import type DxTextBox from "devextreme-vue/text-box";
 import { ButtonStylingMode, ButtonType, ToastType } from "../../enums";
 import { useToastStore } from "../../stores";
 import type { Column } from "devextreme/ui/data_grid";
-import CandidateApi from "../../apis/candidate/candidate-api"
-import ExportApi from "../../apis/candidate/export-api"
-import PopupCandidate from "./popup/PopupCandidate.vue"
-import PopupImportCandidate from "./popup/PopupImportCandidate.vue";
-import PopupChangeRecruitment from "../recruitment-news/recruitment-news-detail/popup/PopupChangeRecruitment.vue";
 import { formatDate } from "../../utils";
 import { DxPopover } from 'devextreme-vue/popover';
+import PopupUser from './popup/PopupUser.vue'
+import UserApi from "@/apis/user/user-api";
 
 const toastStore = useToastStore();
-const { t, getLocale, setLocale } = useI18n();
-const candidateApi = new CandidateApi();
-const exportApi = new ExportApi();
+const userApi = new UserApi();
 const filterPaging = new PagingRequest();
 const totalCount = ref<number>(0);
 const baseTableRef = ref<InstanceType<typeof DxDataGrid>>(null)
 const isShowPopup =  ref(false);
-const isUpdate = ref<boolean>(false);
-const collection = ref(new CollectionModel());
+const isUpdate = ref<boolean>(false);;
 const isShowPopupImport = ref<boolean>(false);
-const candidateID = ref(undefined)
-const popupTitle = ref("Thêm bộ sưu tập");
-const selectedRowData = ref<RecruitmentDetailModel[]>([])
+const userID = ref(undefined)
 const selectedRowKey = ref<number[]>([])
 
 const dataSource = new CustomStore({
-    key: "CandidateID",
+    key: "UserID",
     async load(loadOptions) {
-        const res = await candidateApi.getFilterPaging(filterPaging);
+        filterPaging.Collums = ["FullName","EmailOffice", "UserName", "Email"]
+        const res = await userApi.getFilterPaging(filterPaging);
         if (res) {
             totalCount.value = res.data.Data.TotalCount;
         }
@@ -171,11 +151,19 @@ const tableConfig = ref<DxDataGrid>({
     columns: [
         {
             alignment: "left",
-            caption: "Tên ứng viên",
-            dataField: "CandidateName",
+            caption: "Họ và tên",
+            dataField: "FullName",
             dataType: "string",
             cellTemplate: "name-template",
             width: 300,
+        },
+        {
+            alignment: "left",
+            caption: "Giới tính",
+            dataField: "Gender",
+            cellTemplate: "gender-template",
+            dataType: "string",
+            width: 200,
         },
         {
             alignment: "left",
@@ -189,6 +177,20 @@ const tableConfig = ref<DxDataGrid>({
             caption: "Email",
             dataField: "Email",
             dataType: "string",
+            width: 300,
+        },
+        {
+            alignment: "left",
+            caption: "Vai trò",
+            dataField: "RoleName",
+            dataType: "string",
+            width: 200,
+        },
+        {
+            alignment: "left",
+            caption: "Tên tài khoảng",
+            dataField: "UserName",
+            dataType: "string",
             width: 200,
         },
         {
@@ -201,9 +203,8 @@ const tableConfig = ref<DxDataGrid>({
         },
         {
             alignment: "left",
-            caption: "Ngày ứng tuyển",
-            dataField: "ApplyDate",
-            cellTemplate: "date-template",
+            caption: "Địa chỉ",
+            dataField: "Address",
             dataType: "string",
             width: 200,
         },
@@ -216,60 +217,31 @@ const tableConfig = ref<DxDataGrid>({
         },
         {
             alignment: "left",
-            caption: "Tin tuyển dụng",
-            dataField: "RecruitmentName",
+            caption: "Email công ty",
+            dataField: "EmailOffice",
             dataType: "string",
-            width: 200,
+            width: 300,
         },
         {
             alignment: "left",
-            caption: "Vòng ứng tuyển",
-            dataField: "RecruitmentRoundName",
-            dataType: "string",
-            width: 200,
-        },
-        {
-            alignment: "left",
-            caption: "Nguồn ứng viên",
-            dataField: "ChannelName",
-            dataType: "string",
-            width: 200,
-        },
-        {
-            alignment: "left",
-            caption: "Trình độ đào tạo",
-            dataField: "EducationDegreeName",
-            dataType: "string",
-            width: 200,
-        },
-        {
-            alignment: "left",
-            caption: "Nơi đào tạo",
-            dataField: "EducationPlaceName",
-            dataType: "string",
-            width: 200,
-        },
-        {
-            alignment: "left",
-            caption: "Chuyên ngành",
-            dataField: "EducationMajorName",
+            caption: "Trạng thái",
+            dataField: "Status",
+            cellTemplate: "status-template",
             dataType: "string",
             width: 200,
         },
     ] as (string | Column<any, any>)[],
     dataSource: dataSource,
-    keyExpr: "CandidateID",
+    keyExpr: "UserID",
     onSelectionChanged(e) {
-        selectedRowData.value = e.selectedRowsData
         selectedRowKey.value = e.selectedRowKeys 
     },
 });
 
 function handleEdit(e: any){
-    candidateID.value = e.CandidateID
+    userID.value = e.UserID
     isUpdate.value = true
     isShowPopup.value = true
-    
 }
 
 const searchDefaultConfig: DxTextBox = {
@@ -286,7 +258,6 @@ const searchDefaultConfig: DxTextBox = {
     ],
     onValueChanged: (e) => {
         filterPaging.SearchValue = e.value?.trim();
-        filterPaging.Collums = ["CandidateName", "Email", "Mobile", "EducationMajorName", "EducationDegreeName"]
         filterPaging.PageIndex = 1;
         baseTableRef.value.getInstance().refresh();
     },
@@ -295,11 +266,11 @@ const searchDefaultConfig: DxTextBox = {
 const DeleteMultipleConfig = ref<DxButton>({
     type: ButtonType.danger,
     height: '100%',
-    text: "Xóa ứng viên",
+    text: "Xóa thành viên",
     icon:"trash",
     stylingMode: ButtonStylingMode.outlined,
     async onClick(e) {
-        const res = await candidateApi.deleteBulk(selectedRowKey.value)
+        const res = await userApi.deleteBulk(selectedRowKey.value)
         if(res.data.Success){
             toastStore.toggleToast(true, "Xóa thành công", ToastType.success);
             baseTableRef.value.getInstance().refresh();
@@ -309,36 +280,10 @@ const DeleteMultipleConfig = ref<DxButton>({
     },
 })
 
-const ExportConfig = ref<DxButton>({
-    type: ButtonType.success,
-    height: '100%',
-    text: "Xuất khẩu",
-    icon:"exportxlsx",
-    stylingMode: ButtonStylingMode.outlined,
-    onClick(e) {
-        exportExcel()
-    },
-})
-
-const isShowPopupChangeRecruitment = ref(false)
-
-const ChangeRecruitmentConfig = ref<DxButton>({
-    type: ButtonType.default,
-    height: '100%',
-    text: "Chuyển tin tuyển dụng",
-    stylingMode: ButtonStylingMode.contained,
-    icon: "arrowright",
-    onClick(e) {
-        isShowPopupChangeRecruitment.value = true
-    },
-})
-
 function handleAddCandidate(){
-    collection.value = new CollectionModel();
-        popupTitle.value = "Thêm bộ sưu tập";
-        isShowPopup.value = true;
-        isUpdate.value = false;
-        candidateID.value = undefined
+    isShowPopup.value = true;
+    isUpdate.value = false;
+    userID.value = undefined
 }
 
 function pagingChange(e: BaseNavigationType) {
@@ -377,42 +322,13 @@ function getInitials(name: string) {
 }
 
 async function handleDelete(event: any) {
-    const res = await candidateApi.delete(event.CandidateID)
+    const res = await userApi.delete(event.CandidateID)
     if(res.data.Success){
         toastStore.toggleToast(true, "Xóa thành công", ToastType.success);
         baseTableRef.value.getInstance().refresh();
     }else{
         toastStore.toggleToast(true, "Xóa thất bại", ToastType.error);
     }
-}
-
-function handleSaveCandidate(){
-    isShowPopupChangeRecruitment.value = false
-    baseTableRef.value.getInstance().refresh();
-}
-
-/**
- * Thực hiện xử lý xuất excel
- **  Author: Nguyễn Quang Minh(28/12/2022)
-    */
-async function exportExcel() {
-    let candidateIDS: number[] = []
-    if(selectedRowKey.value.length){
-        candidateIDS = selectedRowKey.value
-    }
-    const res = await exportApi.exportCandidate(candidateIDS)
-        const url = window.URL.createObjectURL(
-            new Blob([res.data.Data])
-        );
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute(
-            "download",
-            "DSUV.xlsx"
-        );
-        document.body.appendChild(link);
-        link.click();
-    
 }
 </script>
 
@@ -429,20 +345,11 @@ async function exportExcel() {
     font-size: 14px!important;
     height: 36px!important;
     padding: 8px 12px!important;
-    border-radius: 4px 0 0 4px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     background-color: #2680eb!important;
     border-right: 1px solid #ffffff;
-}
-.option-btn{
-    width: auto;
-    font-weight: 500;
-    font-size: 14px!important;
-    height: 36px!important;
-    padding: 8px 12px!important;
-    border-radius: 0px 4px 4px 0px;
-    background-color: #2680eb!important;
 }
 .container-candidate{
     width: 100%;
@@ -491,6 +398,19 @@ async function exportExcel() {
     color: red;
     position: absolute;
     bottom: -16px;
+}
+
+.publish{
+    color: #48bb56!important;
+    display: flex;
+    align-items: center;
+    height: 30px;
+}
+.stop{
+    color: red!important;
+    display: flex;
+    align-items: center;
+    height: 30px;
 }
 .field {
     position: relative;

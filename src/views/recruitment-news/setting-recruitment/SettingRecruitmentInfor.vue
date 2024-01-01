@@ -312,6 +312,7 @@ const jobPositionData = new DataSource({
         return res.data.Data.Data || []
     },
     byKey: async (id: any) => {
+        if(!id) return
         const res = await jobPositionApi.getByID(id)
         return res.data.Data 
     }
@@ -356,6 +357,7 @@ const workLocationData = new DataSource({
         return res.data.Data.Data || []
     },
     byKey: async (id: any) => {
+        if(!id) return
         const res = await workLocationApi.getByID(id)
         return res.data.Data
     }

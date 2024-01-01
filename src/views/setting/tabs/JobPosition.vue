@@ -29,7 +29,6 @@
                         @on-edit="handleEdit"
                     >
                         <template #status="data">
-                            {{ test(data.data.data) }}
                             <div :class="data.data.data.Status == '1' ? 'publish' : 'stop'">{{ data.data.data.Status == 1 ? 'Đang sử dụng' : 'Ngưng sử dụng' }}</div>
                         </template>               
                     </base-table>
@@ -109,7 +108,7 @@
                         height="30"
                         class="mr-6"
                     />
-                    Bạn có chắc chắn muốn xóa danh mục không
+                    Bạn có chắc chắn muốn xóa vị trí công việc không?
                 </div>
             </div>
         </template>
@@ -150,11 +149,6 @@ const toastStore = useToastStore();
 const isEdit = ref(false)
 const jobPosition = ref<JobPositionModel>(new JobPositionModel())
 const jobPositionApi = new JobPositionApi()
-
-function test(log: any){
-    console.log(log);
-    
-}
 
 const popupConfig = ref<DxPopup>({
     height: "auto",

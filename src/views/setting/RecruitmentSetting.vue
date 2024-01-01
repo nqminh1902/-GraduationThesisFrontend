@@ -45,6 +45,15 @@
                     />
                     <div class="">Địa điểm công ty</div>
                 </div>
+                <div class="setting-sidebar-item" :class="routeActive == 'role' && 'active'" @click="ChangeRouter('role')">
+                    <Icon icon="carbon:user-role"  
+                    width="20"
+                    height="20"
+                    :color="'#7a8188'"
+                    class="cursor-pointer mr-[8px]"
+                    />
+                    <div class="">Vai trò</div>
+                </div>
             </div>
             <div class="flex-1 h-full overflow-hidden">
                 <router-view></router-view>
@@ -54,6 +63,7 @@
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
+import { Icon } from "@iconify/vue";
 import { useRoute, useRouter } from "vue-router";
 const routeActive = ref("job-position")
 const route = useRoute()
@@ -75,6 +85,9 @@ function ChangeRouter(name: string){
             break;
         case "work-location":
             router.push({ name: 'setting-work-location'})
+            break;
+        case "role":
+            router.push({ name: 'role'})
             break;
         default:
             router.push({ name: 'setting-position'})

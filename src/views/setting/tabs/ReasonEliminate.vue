@@ -97,7 +97,7 @@
                         height="30"
                         class="mr-6"
                     />
-                    Bạn có chắc chắn muốn xóa danh mục không
+                    Bạn có chắc chắn muốn xóa lý do không?
                 </div>
             </div>
         </template>

@@ -68,9 +68,9 @@ export const recruitmentSidebar = [
         title: "Thiết lập",
         name: "setting"
     },
-    // {
-    //     icon: "mdi:report-pie-outline",
-    //     title: "Báo cáo",
-    //     name: "report"
-    // }
+    {
+        icon: "ri:user-fill",
+        title: "Người dùng",
+        name: "user"
+    }
 ]

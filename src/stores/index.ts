@@ -1,15 +1,15 @@
 import { useCartStore } from './cart';
-import { useUserOptionStore } from './user-option';
 import { useRecentStore } from './recent';
 import { useCompareStore } from './compare';
 import { useToastStore } from './toast';
 import { useRecruitmentStore } from './recruitment';
+import { useUserStore } from './user';
 
 export {
-    useUserOptionStore,
     useCartStore,
     useRecentStore,
     useCompareStore,
     useToastStore,
-    useRecruitmentStore
+    useRecruitmentStore,
+    useUserStore
 };

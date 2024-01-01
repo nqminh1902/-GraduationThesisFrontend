@@ -1,6 +1,6 @@
 import apiConfig from './api-config';
 import axios from 'axios';
-
+import router from '@/router';
 const api = axios.create({
     baseURL: apiConfig,
     headers: {
@@ -19,9 +19,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     (err) => {
-        /**
-         * TODO: thêm một số case
-         */
+        router.push({ name: "login" })
         return Promise.reject(err);
     }
 );

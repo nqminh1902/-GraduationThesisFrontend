@@ -19,27 +19,27 @@ function getUserOptionStorage(): UserType {
     }
 }
 
-export const useUserOptionStore = defineStore('user', () => {
-    const userOptions = ref<UserType>(getUserOptionStorage());
+// export const useUserOptionStore = defineStore('user', () => {
+//     const userOptions = ref<UserType>(getUserOptionStorage());
 
-    const initData = () => {
-        userOptions.value = getUserOptionStorage();
-    };
+//     const initData = () => {
+//         userOptions.value = getUserOptionStorage();
+//     };
 
-    const changeLanguageOption = (newLanguage: string) => {
-        userOptions.value.LanguageOption = newLanguage;
-        localStorage.setItem('userOptions', JSON.stringify(userOptions.value));
-    };
+//     const changeLanguageOption = (newLanguage: string) => {
+//         userOptions.value.LanguageOption = newLanguage;
+//         localStorage.setItem('userOptions', JSON.stringify(userOptions.value));
+//     };
 
-    const changeUnitOption = (newUnit: UnitOption) => {
-        userOptions.value.UnitOption = newUnit;
-        localStorage.setItem('userOptions', JSON.stringify(userOptions.value));
-    };
+//     const changeUnitOption = (newUnit: UnitOption) => {
+//         userOptions.value.UnitOption = newUnit;
+//         localStorage.setItem('userOptions', JSON.stringify(userOptions.value));
+//     };
 
-    return {
-        userOptions: readonly(userOptions),
-        initData,
-        changeLanguageOption,
-        changeUnitOption,
-    };
-});
+//     return {
+//         userOptions: readonly(userOptions),
+//         initData,
+//         changeLanguageOption,
+//         changeUnitOption,
+//     };
+// });

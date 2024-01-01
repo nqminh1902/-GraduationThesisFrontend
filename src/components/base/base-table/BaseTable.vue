@@ -7,6 +7,9 @@
             <template #image-template="{ data }">
                 <slot name="image" :data="data"></slot>
             </template>
+            <template #gender-template="{ data }">
+                <slot name="gender" :data="data"></slot>
+            </template>
             <template #date-template="{ data }">
                 <slot name="date" :data="data"></slot>
             </template>

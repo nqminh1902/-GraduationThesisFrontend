@@ -1,24 +1,22 @@
 import { BaseModel } from '.';
 
 export class UserModel extends BaseModel {
-    UserId: string;
-    UserName?: string;
-    Age?: number;
-    Gender?: number;
-    PhoneNumber?: string;
-    Address?: string;
-    Account: string;
-    Passwords: string;
-
-    constructor() {
-        super();
-        this.UserId = '';
-        this.UserName = '';
-        this.Age = 0;
-        this.Gender = 2;
-        this.PhoneNumber = '';
-        this.Address = '';
-        this.Account = '';
-        this.Passwords = '';
-    }
+    UserID: number = 0
+    Avatar: string = ""
+    UserName: string = ""
+    Password: string = ""
+    RoleName: string = ""
+    RoleID: number = 0
+    Email: string = ""
+    FullName: string = ""
+    Mobile: any = ""
+    BirthDay: Date = new Date()
+    Gender: number = 0
+    Address: string = ""
+    JobPositionID: number = 0
+    JobPositionName: string = ""
+    IsUser: boolean = true
+    EmailOffice: string = ""
+    Status: number = 1
+    IsSendActive: boolean = true
 }

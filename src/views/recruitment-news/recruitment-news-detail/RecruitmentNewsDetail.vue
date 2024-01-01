@@ -127,6 +127,7 @@
                         <base-button :config="EmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
                         <base-button :config="RecruitmentContinueConfig" class=" ml-[12px]" v-if="currentStatus == 2"/>
                         <base-button :config="RevokeEmployeeConfig" class=" ml-[12px]" v-if="currentRound == recruitment.RecruitmentRounds[recruitment.RecruitmentRounds.length - 1].RecruitmentRoundID"/>
+                        <base-button :config="ExportConfig" class=" ml-[12px]"/>
                         <base-button :config="DeleteMultipleConfig" class=" ml-[12px]"/>
                         <base-button :config="RemoveFromRecruitConfig" class=" ml-[12px]"/>
                     </div>
@@ -305,6 +306,7 @@ import ScheduleTab from "./tab/ScheduleTab.vue"
 import PopupRecruitmentSchedule from "./popup/PopupRecruitmentSchedule.vue"
 import PopupChangeRecruitment from "./popup/PopupChangeRecruitment.vue";
 import ReportTab from "./tab/ReportTab.vue"
+import ExportApi from "../../../apis/candidate/export-api";
 
 const recruitmentStore = useRecruitmentStore()
 const toastStore = useToastStore();
@@ -432,6 +434,17 @@ const DeleteMultipleConfig = ref<DxButton>({
         }else{
             toastStore.toggleToast(true, "Xóa thất bại", ToastType.error);
         }
+    },
+})
+
+const ExportConfig = ref<DxButton>({
+    type: ButtonType.success,
+    height: '100%',
+    text: "Xuất khẩu",
+    icon:"exportxlsx",
+    stylingMode: ButtonStylingMode.outlined,
+    onClick(e) {
+        exportExcel()
     },
 })
 
@@ -796,6 +809,32 @@ async function handleUpdateStatus(status: number){
     }else{
         toastStore.toggleToast(true, "Cập nhật trạng thái tin thất bại", ToastType.error)
     }
+}
+
+const exportApi = new ExportApi();
+
+/**
+ * Thực hiện xử lý xuất excel
+ **  Author: Nguyễn Quang Minh(28/12/2022)
+    */
+async function exportExcel() {
+    let candidateIDS: number[] = []
+    if(selectedRowKey.value.length){
+        candidateIDS = selectedRowKey.value
+    }
+    const res = await exportApi.exportCandidate(candidateIDS)
+        const url = window.URL.createObjectURL(
+            new Blob([res.data.Data])
+        );
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute(
+            "download",
+            "DSUV.xlsx"
+        );
+        document.body.appendChild(link);
+        link.click();
+    
 }
 </script>
 <style lang="scss" scoped>

@@ -7,4 +7,8 @@ export default class UserApi extends BaseApi<UserModel> {
     constructor() {
         super('User');
     }
+
+    userLogin(user: UserModel): Promise<AxiosResponse> {
+        return this.baseApi.post(this.controller + `/login`, user)
+    }
 }

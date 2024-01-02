@@ -20,6 +20,7 @@ api.interceptors.response.use(
     (response) => response,
     (err) => {
         router.push({ name: "login" })
+        sessionStorage.removeItem("token")
         return Promise.reject(err);
     }
 );

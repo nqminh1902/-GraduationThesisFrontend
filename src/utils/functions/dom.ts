@@ -1,11 +1,6 @@
 import { useUserStore } from '@/stores';
 import { createPinia, storeToRefs } from 'pinia';
 
-const pinia = createPinia();
-const userStore = useUserStore(pinia)
-
-const { user, permissions } = storeToRefs(userStore)
-
 export const handleAppUnmounted = () => {
     const app: HTMLElement | null = document.querySelector('#app');
     if (app) {
@@ -31,25 +26,27 @@ export const validateEmail = (email: string) => {
     return emailRegex.test(email);
 }
 
-export const checkUserAuthentication = (permissionRoute: any[]) => {
-    if (!user.value && permissionRoute[0].meta.requiresAuth) {
-        return true
-    }
-    return true
-}
+export const checkUserPermission = (SubsystemCode: string, permission?: string) => {
+    const userStore = useUserStore()
 
-export const checkUserPermission = (permissionRoute: any[]) => {
-    if (permissionRoute[0].meta.requiresPermission) {
-        const routePermission = permissionRoute[0].meta.requiresPermission.split(";")
-        if (routePermission) {
-            const isHaveSubsystem = permissions.value.find(per => per.SubsystemCode == routePermission[0] && per.PermissionName == routePermission[1])
-            if (isHaveSubsystem) {
-                return true
-            } else {
-                return true
-            }
+    const { user, permissions } = storeToRefs(userStore)
+
+    if (SubsystemCode && permission) {
+        const findPermission = permissions.value.find((per) => per.SubsystemCode == SubsystemCode && per.PermissionName == permission)
+        if (findPermission) {
+            return true
+        } else {
+            return false
         }
-    } else {
-        return true
+    } else if (SubsystemCode) {
+        const findPermission = permissions.value.find((per) => per.SubsystemCode == SubsystemCode)
+        if (findPermission) {
+            return true
+        } else {
+            return false
+        }
     }
+
+
+    return true
 }

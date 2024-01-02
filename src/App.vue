@@ -20,6 +20,8 @@ const router = useRouter()
 watch(() => route.path, (newPath, oldPath) => {
     if(newPath.includes("login")){
         user.value == null
+        userStore.removeUser()
+        sessionStorage.removeItem("token")
     }
 })
 </script>

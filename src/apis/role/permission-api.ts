@@ -3,7 +3,7 @@ import BaseApi from '../base/base-api';
 import type { ServiceResponse } from '@/DTOs';
 import type { AxiosResponse } from 'axios';
 
-export default class RoleApi extends BaseApi<PermissionModel> {
+export default class PermissionApi extends BaseApi<PermissionModel> {
     constructor() {
         super('Permission');
     }

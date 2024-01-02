@@ -18,8 +18,7 @@ const router = createRouter({
                 name: 'recruitment-news',
                 meta: {
                     Title: 'Tin tuyển dụng',
-                    requiresAuth: true,
-                    requiresPermission: "Recruitment,Xem"
+                    SubsystemCode: "Recruitment"
                 },
                 component: () => import('../views/recruitment-news/RecruitmentNews.vue'),
             },
@@ -28,8 +27,7 @@ const router = createRouter({
                 name: 'recruitment-news-detail',
                 meta: {
                     Title: 'Chi tiết tin',
-                    requiresAuth: true,
-                    requiresPermission: "Recruitment;Xem"
+                    SubsystemCode: "Recruitment"
                 },
                 component: () => import('../views/recruitment-news/recruitment-news-detail/RecruitmentNewsDetail.vue'),
             },
@@ -38,8 +36,7 @@ const router = createRouter({
                 name: 'candidate',
                 meta: {
                     Title: 'Ứng viên',
-                    requiresAuth: true,
-                    requiresPermission: "Candidate;Xem"
+                    SubsystemCode: "Candidate"
                 },
                 component: () => import('../views/candidate/Candidate.vue'),
             },
@@ -48,8 +45,7 @@ const router = createRouter({
                 name: 'schedule',
                 meta: {
                     Title: "Lịch tuyển dụng",
-                    requiresAuth: true,
-                    requiresPermission: "CandidateSchedule;Xem"
+                    SubsystemCode: "CandidateSchedule"
                 },
                 component: () => import('../views/schedule/RecruitmentSchedule.vue'),
             },
@@ -58,8 +54,7 @@ const router = createRouter({
                 name: 'setting-recruitment',
                 meta: {
                     Title: 'Tin tuyển dụng',
-                    requiresAuth: true,
-                    requiresPermission: "Recruitment;Thêm"
+                    SubsystemCode: "Recruitment"
                 },
                 redirect: { name: 'setting-recruitment-infor' },
                 children: [
@@ -68,7 +63,7 @@ const router = createRouter({
                         name: 'setting-recruitment-infor',
                         meta: {
                             Title: 'Tin tuyển dụng',
-                            requiresAuth: true
+                            SubsystemCode: "Recruitment"
                         },
                         component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitmentInfor.vue'),
                     },
@@ -77,7 +72,7 @@ const router = createRouter({
                         name: 'setting-recruitment-plan',
                         meta: {
                             Title: 'Tin tuyển dụng',
-                            requiresAuth: true
+                            SubsystemCode: "Recruitment"
                         },
                         component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitmentPlan.vue'),
                     },
@@ -86,7 +81,7 @@ const router = createRouter({
                         name: 'setting-recruitment-process',
                         meta: {
                             Title: 'Tin tuyển dụng',
-                            requiresAuth: true
+                            SubsystemCode: "Recruitment"
                         },
                         component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitmentProcess.vue'),
                     },
@@ -95,7 +90,7 @@ const router = createRouter({
                         name: 'setting-recruitment-council',
                         meta: {
                             Title: 'Tin tuyển dụng',
-                            requiresAuth: true
+                            SubsystemCode: "Recruitment"
                         },
                         component: () => import('../views/recruitment-news/setting-recruitment/SettingRecruitmentCouncil.vue'),
                     },
@@ -107,8 +102,7 @@ const router = createRouter({
                 name: 'setting',
                 meta: {
                     Title: 'Thiết lập',
-                    requiresAuth: true,
-                    requiresPermission: "Setting;Xem"
+                    SubsystemCode: "Setting"
                 },
                 redirect: { name: 'setting-position' },
                 children: [
@@ -117,8 +111,7 @@ const router = createRouter({
                         name: 'setting-position',
                         meta: {
                             Title: 'Thiết lập',
-                            requiresAuth: true,
-                            requiresPermission: "Setting;Xem"
+                            SubsystemCode: "Setting"
                         },
                         component: () => import('../views/setting/tabs/JobPosition.vue'),
                     },
@@ -127,8 +120,7 @@ const router = createRouter({
                         name: 'setting-university',
                         meta: {
                             Title: 'Thiết lập',
-                            requiresAuth: true,
-                            requiresPermission: "Setting;Xem"
+                            SubsystemCode: "Setting"
                         },
                         component: () => import('../views/setting/tabs/University.vue'),
                     },
@@ -137,8 +129,7 @@ const router = createRouter({
                         name: 'setting-education-major',
                         meta: {
                             Title: 'Thiết lập',
-                            requiresAuth: true,
-                            requiresPermission: "Setting;Xem"
+                            SubsystemCode: "Setting"
                         },
                         component: () => import('../views/setting/tabs/EducationMajor.vue'),
                     },
@@ -147,8 +138,7 @@ const router = createRouter({
                         name: 'setting-reason-eliminate',
                         meta: {
                             Title: 'Thiết lập',
-                            requiresAuth: true,
-                            requiresPermission: "Setting;Xem"
+                            SubsystemCode: "Setting"
                         },
                         component: () => import('../views/setting/tabs/ReasonEliminate.vue'),
                     },
@@ -157,8 +147,7 @@ const router = createRouter({
                         name: 'setting-work-location',
                         meta: {
                             Title: 'Thiết lập',
-                            requiresAuth: true,
-                            requiresPermission: "Setting;Xem"
+                            SubsystemCode: "Setting"
                         },
                         component: () => import('../views/setting/tabs/WorkLocation.vue'),
                     },
@@ -167,8 +156,7 @@ const router = createRouter({
                         name: 'role',
                         meta: {
                             Title: 'Thiết lập',
-                            requiresAuth: true,
-                            requiresPermission: "Setting;Xem"
+                            SubsystemCode: "Setting"
                         },
                         component: () => import('../views/setting/tabs/Role.vue'),
                     },
@@ -177,8 +165,7 @@ const router = createRouter({
                         name: 'role-detail',
                         meta: {
                             Title: 'Thiết lập',
-                            requiresAuth: true,
-                            requiresPermission: "Setting;Xem"
+                            SubsystemCode: "Setting"
                         },
                         component: () => import('../views/setting/tabs/RoleDetail.vue'),
                     },
@@ -190,8 +177,6 @@ const router = createRouter({
                 name: 'user',
                 meta: {
                     Title: "Người dùng",
-                    requiresAuth: true,
-                    requiresPermission: "User;Xem"
                 },
                 component: () => import('../views/users/User.vue'),
             },],
@@ -222,22 +207,14 @@ const router = createRouter({
 
 // Hàm middleware kiểm tra đăng nhập
 router.beforeEach((to, from, next) => {
-    const isAuthenticated = checkUserAuthentication(to.matched); // Kiểm tra đăng nhập
-    const hasPermission = checkUserPermission(to.matched); // Kiểm tra quyền truy cập
-    if (isAuthenticated) {
-        // Kiểm tra xem route yêu cầu đăng nhập không
-        if (isAuthenticated) {
-            // Kiểm tra xem route yêu cầu quyền truy cập không
-            if (hasPermission) {
-                next(); // Cho phép truy cập vào route tiếp theo
-            } else {
-                next('/no-access'); // Chuyển hướng đến trang không có quyền
-            }
-        } else {
-            next('/login'); // Chuyển hướng đến trang đăng nhập
-        }
-    } else {
+    const route = to.matched.filter(item => item.meta.SubsystemCode)
+    if (!route.length) next()
+    const hasPermission = checkUserPermission(route[0].meta.SubsystemCode as string); // Kiểm tra quyền truy cập
+    // Kiểm tra xem route yêu cầu quyền truy cập không
+    if (hasPermission) {
         next(); // Cho phép truy cập vào route tiếp theo
+    } else {
+        next('/no-access'); // Chuyển hướng đến trang không có quyền
     }
 });
 
